@@ -47,5 +47,7 @@ assert 0 '0+2<1;'
 
 assert 6 "a=6;"
 assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
+assert 1 "ab = 1;"
+assert 80 "v1 = 100; v2 = v1 / 10; v3 = v1 - v2 * 2; v3;"
 
 echo OK
