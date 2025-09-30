@@ -45,6 +45,12 @@ Token *tokenize() {
             continue;
         }
 
+        if (strncmp(p, "return", 6) == 0 && !isalnum(p[6])) {
+            cur = new_token(TK_RETURN, cur, p, 6);
+            p += 6;
+            continue;
+        }
+
         if (isalpha(*p) || *p == '_') {
             char *start = p;
 

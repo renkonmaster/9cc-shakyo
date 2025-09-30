@@ -50,4 +50,7 @@ assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
 assert 1 "ab = 1;"
 assert 80 "v1 = 100; v2 = v1 / 10; v3 = v1 - v2 * 2; v3;"
 
+assert 5 "return 5; return 8;"
+assert 14 "a = 3; b = 5 * 6 - 8; return a + b / 2;"
+
 echo OK
