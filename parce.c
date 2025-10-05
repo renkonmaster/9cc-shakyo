@@ -126,6 +126,20 @@ Node *stmt() {
         return node;
     }
 
+    if(consume_kind(TK_FOR)) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        expect("(");
+        node->init = expr();
+        expect(";");    
+        node->cond = expr();
+        expect(";");
+        node->inc = expr();
+        expect(")");
+        node->body = stmt();
+        return node;
+    }
+
     if(consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
