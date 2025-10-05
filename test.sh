@@ -59,4 +59,7 @@ assert 6 "a = 2; if (1) b = a * 3; else b = a * 4; return b;"
 assert 8 "a = 2; if (0) b = a * 3; else b = a * 4; return b;"
 assert 8 "a = 2; if (a - 2) b = a * 3; else b = a * 4; return b;"
 
+assert 10 "i=0; while (i<10) i = i + 1; return i;"
+assert 16 "i=1; while (i<=8) i = i * 2; return i;"
+
 echo OK

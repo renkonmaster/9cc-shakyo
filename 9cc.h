@@ -12,6 +12,7 @@ typedef enum {
     TK_RETURN,
     TK_IF,
     TK_ELSE,
+    TK_WHILE,
     TK_EOF,
 } TokenKind;
 
@@ -72,6 +73,7 @@ typedef enum {
     ND_LVAR,
     ND_RETURN,
     ND_IF,
+    ND_WHILE,
 } NodeKind;
 
 typedef struct Node Node;
@@ -108,6 +110,9 @@ Node *unary();
 Node *primary();
 
 void gen(Node *node);
+void gen_lval(Node *node);
+void gen_if(Node *node);
+void gen_while(Node *node);
 
 int count();
 
