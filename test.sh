@@ -52,5 +52,11 @@ assert 80 "v1 = 100; v2 = v1 / 10; v3 = v1 - v2 * 2; v3;"
 
 assert 5 "return 5; return 8;"
 assert 14 "a = 3; b = 5 * 6 - 8; return a + b / 2;"
+assert 12 "a = 4; b = 18; c = a * b / 2; return c / 3;"
+assert 1 "return 1; a = 3;"
+
+assert 6 "a = 2; if (1) b = a * 3; else b = a * 4; return b;"
+assert 8 "a = 2; if (0) b = a * 3; else b = a * 4; return b;"
+assert 8 "a = 2; if (a - 2) b = a * 3; else b = a * 4; return b;"
 
 echo OK

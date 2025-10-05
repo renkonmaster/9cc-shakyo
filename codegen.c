@@ -1,5 +1,10 @@
 #include "9cc.h"
 
+int count(void) {
+    static int c = 0;
+    return c++;
+}
+
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR) {
         error("Left value is not variable");
@@ -10,7 +15,31 @@ void gen_lval(Node *node) {
     printf("  push rax\n");
 }
 
+void gen_if(Node *node) {
+    int c = count();
+    gen(node->cond);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    if(node->els) {
+        printf("  je  .Lelse%d\n", c);
+        gen(node->then);
+        printf("  jmp .Lend%d\n", c);
+        printf(".Lelse%d:\n", c);
+        gen(node->els);
+        printf(".Lend%d:\n", c);
+    }else{
+        printf("  je  .Lend%d\n", c);
+        gen(node->then);
+        printf(".Lend%d:\n", c);
+    }
+}
+
 void gen(Node *node) {
+    if (node->kind == ND_IF) {
+        gen_if(node);
+        return;
+    }
+
     if (node->kind == ND_RETURN) {
         gen(node->lhs);
         printf("  pop rax\n");

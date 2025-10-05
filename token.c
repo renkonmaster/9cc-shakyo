@@ -45,6 +45,18 @@ Token *tokenize() {
             continue;
         }
 
+        if (strncmp(p, "if", 2) == 0 && !isalnum(p[2])) {
+            cur = new_token(TK_IF, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        if (strncmp(p, "else", 4) == 0 && !isalnum(p[4])) { 
+            cur = new_token(TK_ELSE, cur, p, 4);
+            p += 4;
+            continue;
+        }
+
         if (strncmp(p, "return", 6) == 0 && !isalnum(p[6])) {
             cur = new_token(TK_RETURN, cur, p, 6);
             p += 6;

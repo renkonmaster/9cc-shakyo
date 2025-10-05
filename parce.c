@@ -30,20 +30,19 @@ bool consume(char *op) {
     return true;
 }
 
-bool consume_return(TokenKind kind) {
-    if (token->kind != TK_RETURN) {
-        return false;
-    }
-    token = token->next;
-    return true;
-}
-
 Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return NULL;
     Token *t = token;
     token = token->next;
     return t;
+}
+
+bool consume_kind(TokenKind kind) {
+    if (token->kind != kind)
+        return false;
+    token = token->next;
+    return true;
 }
 
 void expect(char *op) {
@@ -104,15 +103,28 @@ void program() {
 Node *stmt() {
     Node *node;
 
-    if(consume_return(TK_RETURN)) {
+    if(consume_kind(TK_IF)) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+        if(consume_kind(TK_ELSE)) {
+            node->els = stmt();
+        }
+        return node;
+    }
+
+    if(consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
     } else {
         node = expr();
     }
-    if (!consume(";"))
-        error_at(token->str, "expected ';'");
+
+    expect(";");
     return node;
 }
 
