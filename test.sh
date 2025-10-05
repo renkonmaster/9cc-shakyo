@@ -65,4 +65,8 @@ assert 16 "i=1; while (i<=8) i = i * 2; return i;"
 assert 21 "sum=0; for (i=1;i<=6;i=i+1) sum=sum+i; return sum;"
 assert 55 "sum=0; for (i=1;i<=10;i=i+1) sum=sum+i; return sum;"
 
+assert 3 "{1;2; return 3;}"
+assert 11 "if (1) {i = 1; i = i + 10;} return i;"
+assert 15 "i = 1; j = 0; while (i <= 5) { j = j + i; i = i + 1; } return j;"
+
 echo OK

@@ -61,6 +61,13 @@ void gen_for(Node *node) {
 }
 
 void gen(Node *node) {
+    if (node->kind == ND_BLOCK) {
+        for (int i = 0; i < node->block_size; i++) {
+            gen(node->block[i]);
+        }
+        return;
+    }
+
     if (node->kind == ND_IF) {
         gen_if(node);
         return;

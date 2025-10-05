@@ -140,6 +140,22 @@ Node *stmt() {
         return node;
     }
 
+    if(consume("{")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+
+        Node **stmts = calloc(100, sizeof(Node*));
+        int i = 0;
+
+        while(!consume("}")) {
+            stmts[i++] = stmt();
+        }
+
+        node->block = stmts;
+        node->block_size = i;
+        return node;
+    }
+
     if(consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
