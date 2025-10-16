@@ -1,5 +1,9 @@
 #include "9cc.h"
 
+char *user_input;
+Token *token;
+Node *code[100];
+
 void dump_ast_simple(Node *node, int indent) {
     if (!node) {
         return;

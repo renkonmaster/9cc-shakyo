@@ -126,6 +126,6 @@ void gen_while(Node *node);
 
 int count();
 
-char *user_input;
-Token *token;
-Node *code[100];
+extern char *user_input;
+extern Token *token;
+extern Node *code[100];
