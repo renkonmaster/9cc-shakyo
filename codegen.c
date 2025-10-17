@@ -92,6 +92,16 @@ void gen(Node *node) {
         return;
     }
 
+    if (node->kind == ND_FUNC) {
+        printf("  call ");
+        for (int i = 0; i < node->funcname_len; i++) {
+            printf("%c", node->funcname[i]);
+        }
+        printf("\n");
+        printf("  push rax\n");
+        return;
+    }
+
     switch (node->kind) {
     case ND_NUM:
         printf("  push %d\n", node->val);

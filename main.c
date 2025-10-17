@@ -87,6 +87,9 @@ int main(int argc, char **argv) {
 
 
     printf(".intel_syntax noprefix\n");
+    printf(".section .note.GNU-stack,\"\",@progbits\n");
+    printf(".extern foo\n");
+    printf(".text\n");
     printf(".global main\n");
     printf("main:\n");
 
@@ -99,7 +102,8 @@ int main(int argc, char **argv) {
 
         printf("  pop rax\n");
     }
-
+    
+    printf("  mov rax, 0\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
