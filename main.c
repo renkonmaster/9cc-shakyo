@@ -69,22 +69,8 @@ int main(int argc, char **argv) {
     user_input = argv[1];
     token = tokenize();
     Token *copyToken = token;
-    //show tokenized token
-    // while(copyToken->kind != TK_EOF) {
-    //     printf("kind: %d, str: %.*s, val: %d\n", copyToken->kind, copyToken->len, copyToken->str, copyToken->val);  
-    //     copyToken = copyToken->next;
-    // }
 
     program();
-
-    // printf("\n--- AST DUMP START ---\n");
-    // for (int i = 0; code[i]; i++) {
-    //     printf("Statement %d:\n", i + 1);
-    //     // インデント0から開始
-    //     dump_ast_simple(code[i], 0); 
-    // }
-    // printf("--- AST DUMP END ---\n\n");
-
 
     printf(".intel_syntax noprefix\n");
     printf(".section .note.GNU-stack,\"\",@progbits\n");
@@ -103,7 +89,6 @@ int main(int argc, char **argv) {
         printf("  pop rax\n");
     }
     
-    //printf("  mov rax, 0\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
