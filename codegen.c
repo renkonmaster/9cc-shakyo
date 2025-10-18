@@ -60,6 +60,24 @@ void gen_for(Node *node) {
     printf(".Lend%d:\n", c);
 }
 
+void gen_funcall(Node *node) {
+    static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  
+    for (int i = node->arg_count - 1; i >= 0; i--) {
+        gen(node->args[i]);
+    }
+
+    for (int i = 0; i < node->arg_count; i++) {
+        printf("  pop %s\n", argregs[i]);
+    }
+
+    printf("  mov r10, rsp\n"); 
+    printf("  and r10, 15\n");
+    printf("  sub rsp, r10\n");
+    printf("  call %s\n", node->funcname);
+    printf("  add rsp, r10\n");
+    printf("  push rax\n");
+}
+
 void gen(Node *node) {
     if (node->kind == ND_BLOCK) {
         for (int i = 0; i < node->block_size; i++) {
@@ -92,13 +110,8 @@ void gen(Node *node) {
         return;
     }
 
-    if (node->kind == ND_FUNC) {
-        printf("  call ");
-        for (int i = 0; i < node->funcname_len; i++) {
-            printf("%c", node->funcname[i]);
-        }
-        printf("\n");
-        printf("  push rax\n");
+    if (node->kind == ND_FUNCALL) {
+        gen_funcall(node);
         return;
     }
 

@@ -1,4 +1,2 @@
 #include <stdio.h>
-int foo() {
-    printf("foo\n");
-}
+int foo(int x, int y) { printf("%d\n", x + y); }

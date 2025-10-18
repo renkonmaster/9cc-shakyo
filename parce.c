@@ -248,10 +248,20 @@ Node *primary() {
         Node *node = calloc(1, sizeof(Node));
 
         if (consume("(")) {
-            node->kind = ND_FUNC;
-            node->funcname = tok->str;
-            node->funcname_len = tok->len;
-            expect(")");
+            node->kind = ND_FUNCALL;
+            node->funcname = calloc(tok->len + 1, 1);
+            memcpy(node->funcname, tok->str, tok->len);
+            // 引数のパース
+            Node **args = calloc(6, sizeof(Node*));
+            int arg_count = 0;
+            if (!consume(")")) {
+                do {
+                    args[arg_count++] = expr();
+                } while (consume(","));
+                expect(")");
+            }
+            node->args = args;
+            node->arg_count = arg_count;
             return node;
         }
 

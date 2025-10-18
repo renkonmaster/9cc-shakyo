@@ -1,6 +1,5 @@
 CFLAGS=-std=c11 -g -static
-#SRCS=$(wildcard *.c)
-SRCS=codegen.c parce.c token.c main.c
+SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 
 9cc: $(OBJS)

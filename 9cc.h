@@ -77,7 +77,7 @@ typedef enum {
     ND_WHILE,
     ND_FOR,
     ND_BLOCK,
-    ND_FUNC,
+    ND_FUNCALL,
 } NodeKind;
 
 typedef struct Node Node;
@@ -103,7 +103,8 @@ struct Node
     int offset;
 
     char *funcname;
-    int funcname_len;
+    Node **args;
+    int arg_count;
 };
 
 Node *new_node(NodeKind kind);
