@@ -2,7 +2,8 @@
 
 char *user_input;
 Token *token;
-Node *code[100];
+Node *functions[100];
+int functions_count = 0;
 
 void dump_ast_simple(Node *node, int indent) {
     if (!node) {
@@ -74,24 +75,12 @@ int main(int argc, char **argv) {
 
     printf(".intel_syntax noprefix\n");
     printf(".section .note.GNU-stack,\"\",@progbits\n");
-    printf(".extern foo\n");
     printf(".text\n");
     printf(".global main\n");
-    printf("main:\n");
 
-    printf("  push rbp\n");
-    printf("  mov rbp , rsp\n");
-    printf("  sub rsp, 208\n");
-
-    for (int i = 0; code[i]; i++) {
-        gen(code[i]);
-
-        printf("  pop rax\n");
+    for (int i = 0; i < functions_count; i++) {
+        gen(functions[i]);
     }
-    
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
 
     return 0;
 }

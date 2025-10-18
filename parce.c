@@ -92,12 +92,46 @@ Node *new_num(int val) {
     return node;
 }
 
+Node *function_def() {
+    Token *tok = consume_ident();
+    if (!tok) {
+        error_at(token->str, "Expected function name");
+    }
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_FUNCDEF;
+    node->funcname = calloc(tok->len + 1, 1);
+    memcpy(node->funcname, tok->str, tok->len);
+
+    expect("(");
+    Node **args = calloc(6, sizeof(Node*));
+    int arg_count = 0;
+    if (!consume(")")) {
+        do {
+            Token *arg_tok = consume_ident();
+            if (!arg_tok) {
+                error_at(token->str, "Expected argument name");
+            }
+            Node *arg = calloc(1, sizeof(Node));
+            arg->kind = ND_LVAR;
+            arg->funcname = calloc(arg_tok->len + 1, 1);
+            memcpy(arg->funcname, arg_tok->str, arg_tok->len);
+            args[arg_count++] = arg;
+            arg->offset = (arg_count) * 8;
+        }while (consume(","));
+        expect(")");
+    }
+    node->args = args;
+    node->arg_count = arg_count;
+
+    node->body = stmt();
+    return node;
+}
+
 void program() {
     int i = 0;
     while (!at_eof()) {
-        code[i++] = stmt();
+        functions[functions_count++] = function_def();
     }
-    code[i] = NULL;
 }
 
 Node *stmt() {
