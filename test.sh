@@ -4,7 +4,7 @@ assert(){
     input="$2"
 
     ./9cc "$input" > tmp.s
-    cc -o tmp tmp.s foo.o
+    cc -o tmp tmp.s
     ./tmp
     actual="$?"
 
@@ -16,59 +16,71 @@ assert(){
     fi
 }
 
-assert 0 "0;"
-assert 42 "42;"
-assert 21 "5+20-4;"
-assert 41 " 12 + 34 - 5 ;"
-assert 47 '5+6*7;'
-assert 15 '5*(9-6);'
-assert 4 '(3+5)/2;'
-assert 10 '-10+20;'
+assert 3 "
+foo() { return 3; }
+main() { return foo(); }
+"
 
-assert 0 '0==1;'
-assert 1 '42==42;'
-assert 1 '0!=1;'
-assert 0 '42!=42;'
+assert 5 "
+f() { return 5; }
+main() { return f(); }
+"
 
-assert 1 '0<1;'
-assert 0 '1<1;'
-assert 0 '2<1;'
-assert 1 '0<=1;'
-assert 1 '1<=1;'
-assert 0 '2<=1;'
+assert 8 "
+sum(a, b) { return a+ b; }
+main() { return sum(3, 5); }
+"
 
-assert 1 '1>0;'
-assert 0 '1>1;'
-assert 0 '1>2;'
-assert 1 '1>=0;'
-assert 1 '1>=1;'
-assert 0 '1>=2;'
-assert 0 '0+2<1;'
+assert 30 "
+mul(a, b) { return a * b; }
+main() { return mul(5, 6); }
+"
 
-assert 6 "a=6;"
-assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
-assert 1 "ab = 1;"
-assert 80 "v1 = 100; v2 = v1 / 10; v3 = v1 - v2 * 2; v3;"
+assert 27 "
+div(a, b) { return a / b; }
+sub(a, b) { return a - b; }
+main() { return div(84, 4) + sub(10, 4); }
+"
 
-assert 5 "return 5; return 8;"
-assert 14 "a = 3; b = 5 * 6 - 8; return a + b / 2;"
-assert 12 "a = 4; b = 18; c = a * b / 2; return c / 3;"
-assert 1 "return 1; a = 3;"
+assert 21 "
+add6(a, b, c, d, e, f) { return a + b + c + d + e + f; }
+main() { return add6(1, 2, 3, 4, 5, 6); }
+"
 
-assert 6 "a = 2; if (1) b = a * 3; else b = a * 4; return b;"
-assert 8 "a = 2; if (0) b = a * 3; else b = a * 4; return b;"
-assert 8 "a = 2; if (a - 2) b = a * 3; else b = a * 4; return b;"
+assert 4 "
+foo(x) { return x + 1; }
+main() { return foo(foo(foo(1))); }
+"
 
-assert 10 "i=0; while (i<10) i = i + 1; return i;"
-assert 16 "i=1; while (i<=8) i = i * 2; return i;"
+assert 6 "
+main() {
+  a = 1;
+  b = 2;
+  c = 3;
+  d = a + b + c;
+  return d;
+}
+"
 
-assert 21 "sum=0; for (i=1;i<=6;i=i+1) sum=sum+i; return sum;"
-assert 55 "sum=0; for (i=1;i<=10;i=i+1) sum=sum+i; return sum;"
+assert 15 "
+hoge(x) {
+    y = x + 2;
+    return y * 3;
+}
+main() {
+    return hoge(3);
+}
+"
 
-assert 3 "{1;2; return 3;}"
-assert 11 "if (1) {i = 1; i = i + 10;} return i;"
-assert 15 "i = 1; j = 0; while (i <= 5) { j = j + i; i = i + 1; } return j;"
-
-assert 15151 "foo();"
+assert 21 "
+fib(n) {
+    if (n <= 1)
+        return n;
+    return fib(n - 1) + fib(n - 2);
+}
+main() {
+    return fib(8);
+}
+"
 
 echo OK

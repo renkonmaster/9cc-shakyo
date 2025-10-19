@@ -78,6 +78,7 @@ typedef enum {
     ND_FOR,
     ND_BLOCK,
     ND_FUNCALL,
+    ND_FUNCDEF,
 } NodeKind;
 
 typedef struct Node Node;
@@ -105,6 +106,7 @@ struct Node
     char *funcname;
     Node **args;
     int arg_count;
+    LVar *locals;
 };
 
 Node *new_node(NodeKind kind);
@@ -114,6 +116,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_num(int val);
 
 void program();
+Node *function_def();
 Node *stmt();
 Node *assign();
 Node *expr();
@@ -133,4 +136,5 @@ int count();
 
 extern char *user_input;
 extern Token *token;
-extern Node *code[100];
+extern Node *functions[100];
+extern int functions_count;

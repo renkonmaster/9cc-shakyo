@@ -2,7 +2,8 @@
 
 char *user_input;
 Token *token;
-Node *code[100];
+Node *functions[100];
+int functions_count = 0;
 
 void dump_ast_simple(Node *node, int indent) {
     if (!node) {
@@ -69,44 +70,17 @@ int main(int argc, char **argv) {
     user_input = argv[1];
     token = tokenize();
     Token *copyToken = token;
-    //show tokenized token
-    // while(copyToken->kind != TK_EOF) {
-    //     printf("kind: %d, str: %.*s, val: %d\n", copyToken->kind, copyToken->len, copyToken->str, copyToken->val);  
-    //     copyToken = copyToken->next;
-    // }
 
     program();
 
-    // printf("\n--- AST DUMP START ---\n");
-    // for (int i = 0; code[i]; i++) {
-    //     printf("Statement %d:\n", i + 1);
-    //     // インデント0から開始
-    //     dump_ast_simple(code[i], 0); 
-    // }
-    // printf("--- AST DUMP END ---\n\n");
-
-
     printf(".intel_syntax noprefix\n");
     printf(".section .note.GNU-stack,\"\",@progbits\n");
-    printf(".extern foo\n");
     printf(".text\n");
     printf(".global main\n");
-    printf("main:\n");
 
-    printf("  push rbp\n");
-    printf("  mov rbp , rsp\n");
-    printf("  sub rsp, 208\n");
-
-    for (int i = 0; code[i]; i++) {
-        gen(code[i]);
-
-        printf("  pop rax\n");
+    for (int i = 0; i < functions_count; i++) {
+        gen(functions[i]);
     }
-    
-    //printf("  mov rax, 0\n");
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
 
     return 0;
 }
