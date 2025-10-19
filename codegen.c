@@ -105,46 +105,33 @@ void gen_funcdef(Node *node){
 }
 
 void gen(Node *node) {
-    if (node->kind == ND_FUNCDEF) {
+    switch (node->kind)
+    {
+    case ND_FUNCDEF:
         gen_funcdef(node);
         return;
-    }
-
-    if (node->kind == ND_BLOCK) {
+    case ND_BLOCK:
         gen_block(node);
         return;
-    }
-
-    if (node->kind == ND_IF) {
+    case ND_IF:
         gen_if(node);
         return;
-    }
-
-    if (node->kind == ND_WHILE) {
+    case ND_WHILE:
         gen_while(node);
         return;
-    }
-
-    if (node->kind == ND_FOR) {
+    case ND_FOR:
         gen_for(node);
         return;
-    }
-
-    if (node->kind == ND_RETURN) {
+    case ND_RETURN:
         gen(node->rhs);
         printf("  pop rax\n");
         printf("  mov rsp, rbp\n");
         printf("  pop rbp\n");
         printf("  ret\n");
         return;
-    }
-
-    if (node->kind == ND_FUNCALL) {
+    case ND_FUNCALL:
         gen_funcall(node);
         return;
-    }
-
-    switch (node->kind) {
     case ND_NUM:
         printf("  push %d\n", node->val);
         return;    
@@ -165,6 +152,10 @@ void gen(Node *node) {
         return;
     }
 
+    gen_binary(node);
+}
+
+void gen_binary(Node *node) {
     gen(node->lhs);
     gen(node->rhs);
 
