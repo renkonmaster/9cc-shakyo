@@ -106,6 +106,7 @@ struct Node
     char *funcname;
     Node **args;
     int arg_count;
+    LVar *locals;
 };
 
 Node *new_node(NodeKind kind);

@@ -52,6 +52,16 @@ foo(x) { return x + 1; }
 main() { return foo(foo(foo(1))); }
 "
 
+assert 6 "
+main() {
+  a = 1;
+  b = 2;
+  c = 3;
+  d = a + b + c;
+  return d;
+}
+"
+
 assert 15 "
 hoge(x) {
     y = x + 2;
@@ -59,6 +69,17 @@ hoge(x) {
 }
 main() {
     return hoge(3);
+}
+"
+
+assert 21 "
+fib(n) {
+    if (n <= 1)
+        return n;
+    return fib(n - 1) + fib(n - 2);
+}
+main() {
+    return fib(8);
 }
 "
 

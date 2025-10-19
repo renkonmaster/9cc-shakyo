@@ -91,12 +91,14 @@ void gen_funcdef(Node *node){
     printf("  sub rsp, 208\n");
 
     for (int i = 0; i < node->arg_count; i++) {
-        gen_lval(node->args[i]);
-        printf("  pop rax\n");
+        Node *arg = node->args[i];
+        printf("  mov rax, rbp\n");
+        printf("  sub rax, %d\n", arg->offset);
         printf("  mov [rax], %s\n", argregs[i]);
     }
 
     gen(node->body);
+
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
@@ -129,7 +131,7 @@ void gen(Node *node) {
     }
 
     if (node->kind == ND_RETURN) {
-        gen(node->lhs);
+        gen(node->rhs);
         printf("  pop rax\n");
         printf("  mov rsp, rbp\n");
         printf("  pop rbp\n");
@@ -150,7 +152,7 @@ void gen(Node *node) {
         gen_lval(node);
         printf("  pop rax\n");
         printf("  mov rax, [rax]\n");
-        printf("  push rax\n");
+        printf("  push rax\n");  
         return;
     case ND_ASSIGN:
         gen_lval(node->lhs);

@@ -93,6 +93,8 @@ Node *new_num(int val) {
 }
 
 Node *function_def() {
+    locals = NULL;
+
     Token *tok = consume_ident();
     if (!tok) {
         error_at(token->str, "Expected function name");
@@ -111,12 +113,24 @@ Node *function_def() {
             if (!arg_tok) {
                 error_at(token->str, "Expected argument name");
             }
+
             Node *arg = calloc(1, sizeof(Node));
             arg->kind = ND_LVAR;
-            arg->funcname = calloc(arg_tok->len + 1, 1);
-            memcpy(arg->funcname, arg_tok->str, arg_tok->len);
+
+            LVar *lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals;
+            lvar->name = arg_tok->str;
+            lvar->len = arg_tok->len;
+            
+            if (locals) 
+                lvar->offset = locals->offset + 8;
+            else
+                lvar->offset = 8;
+            
+            arg->offset = lvar->offset;
+            locals = lvar;
+
             args[arg_count++] = arg;
-            arg->offset = (arg_count) * 8;
         }while (consume(","));
         expect(")");
     }
@@ -124,6 +138,8 @@ Node *function_def() {
     node->arg_count = arg_count;
 
     node->body = stmt();
+    node->locals = locals;
+
     return node;
 }
 
@@ -193,7 +209,7 @@ Node *stmt() {
     if(consume_kind(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
-        node->lhs = expr();
+        node->rhs = expr();
     } else {
         node = expr();
     }
