@@ -94,4 +94,20 @@ main() {
 }
 "
 
+assert 3 "
+main() {
+    x = 3;
+    y = &x;
+    return *y;
+}"
+
+assert 9 "
+main() {
+    x = 3;
+    y = 4;
+    p = &x;
+    q = &y;
+    return *p + *q + 2;
+}"
+
 echo "✅ all tests passed"
