@@ -9,7 +9,7 @@ assert(){
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
-        echo "✅ $input => $actual"
+        echo "$input => $actual ✅"
     else
         echo "$input => $expected expected, but got $actual"
         exit 1
@@ -17,92 +17,120 @@ assert(){
 }
 
 assert 3 "
-foo() { return 3; }
-main() { return foo(); }
+int foo() { return 3; }
+int main() { return foo(); }
 "
 
 assert 5 "
-f() { return 5; }
-main() { return f(); }
+int f() { return 5; }
+int main() { return f(); }
 "
 
 assert 8 "
-sum(a, b) { return a+ b; }
-main() { return sum(3, 5); }
+int sum(int a, int b) { return a + b; }
+int main() { return sum(3, 5); }
 "
 
 assert 30 "
-mul(a, b) { return a * b; }
-main() { return mul(5, 6); }
+int mul(int a, int b) { return a * b; }
+int main() { return mul(5, 6); }
 "
 
 assert 27 "
-div(a, b) { return a / b; }
-sub(a, b) { return a - b; }
-main() { return div(84, 4) + sub(10, 4); }
+int div(int a, int b) { return a / b; }
+int sub(int a, int b) { return a - b; }
+int main() { return div(84, 4) + sub(10, 4); }
 "
 
 assert 21 "
-add6(a, b, c, d, e, f) { return a + b + c + d + e + f; }
-main() { return add6(1, 2, 3, 4, 5, 6); }
+int add6(int a, int b, int c, int d, int e, int f) { return a + b + c + d + e + f; }
+int main() { return add6(1, 2, 3, 4, 5, 6); }
 "
 
 assert 4 "
-foo(x) { return x + 1; }
-main() { return foo(foo(foo(1))); }
+int foo(int x) { return x + 1; }
+int main() { return foo(foo(foo(1))); }
+"
+
+assert 1 "
+int main() {
+    int a;
+    a = 1;
+    return a;
+}
 "
 
 assert 6 "
-main() {
+int main() {
+  int a;
   a = 1;
+  int b;
   b = 2;
+  int c;
   c = 3;
-  d = a + b + c;
-  return d;
+  return a + b + c;
 }
 "
 
 assert 15 "
-hoge(x) {
+int hoge(int x) {
+    int y;
     y = x + 2;
     return y * 3;
 }
-main() {
+int main() {
     return hoge(3);
 }
 "
 
 assert 21 "
-fib(n) {
+int fib(int n) {
     if (n <= 1)
         return n;
     return fib(n - 1) + fib(n - 2);
 }
-main() {
+int main() {
     return fib(8);
 }
 "
 
 assert 55 "
-fib(n) {
+int fib(int n) {
     if (n <= 1)
         return n;
     return fib(n - 1) + fib(n - 2);
 }
-main() {
+int main() {
     return fib(10);
 }
 "
 
 assert 3 "
-main() {
+int main() {
+    int x;
+    x = 3;
+    int y;
+    y = &x;
+    return *y;
+}
+"
+
+assert 3 "
+int main() {
+    int x;
+    int y;
     x = 3;
     y = &x;
     return *y;
-}"
+}
+"
 
 assert 9 "
-main() {
+int main() {
+    int x;
+    int y;
+    int p;
+    int q;
     x = 3;
     y = 4;
     p = &x;

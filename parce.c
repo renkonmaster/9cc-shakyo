@@ -30,6 +30,14 @@ bool consume(char *op) {
     return true;
 }
 
+bool consume_type(char *type) {
+    if (token->len == strlen(type) && !memcmp(token->str, type, token->len)) {
+        token = token->next;
+        return true;
+    }
+    return false;
+}
+
 Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return NULL;
@@ -92,8 +100,32 @@ Node *new_num(int val) {
     return node;
 }
 
+void declaration() {
+    Token *tok = consume_ident();
+    if (!tok) {
+        error_at(token->str, "Expected variable name");
+        return;
+    }
+
+    LVar *lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    if (locals)
+        lvar->offset = locals->offset + 8;
+    else
+        lvar->offset = 8;
+    locals = lvar;
+
+    expect(";");
+}
+
 Node *function_def() {
     locals = NULL;
+
+    if (!consume_type("int")) {
+        error_at(token->str, "Expected 'int' in function definition");
+    }
 
     Token *tok = consume_ident();
     if (!tok) {
@@ -109,6 +141,8 @@ Node *function_def() {
     int arg_count = 0;
     if (!consume(")")) {
         do {
+            consume_type("int");
+
             Token *arg_tok = consume_ident();
             if (!arg_tok) {
                 error_at(token->str, "Expected argument name");
@@ -198,6 +232,9 @@ Node *stmt() {
         int i = 0;
 
         while(!consume("}")) {
+            while (consume_type("int")) {
+            declaration();
+            }
             stmts[i++] = stmt();
         }
 
@@ -321,16 +358,7 @@ Node *primary() {
         if (lvar) {
             node->offset = lvar->offset;
         } else {
-            lvar = calloc(1, sizeof(LVar));
-            lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
-            if (locals) 
-                lvar->offset = locals->offset + 8;
-            else
-                lvar->offset = 8;
-            node->offset = lvar->offset;
-            locals = lvar;
+            error_at(tok->str, "Undefined variable");
         }
         return node;
     }
