@@ -30,14 +30,6 @@ bool consume(char *op) {
     return true;
 }
 
-bool consume_type(char *type) {
-    if (token->len == strlen(type) && !memcmp(token->str, type, token->len)) {
-        token = token->next;
-        return true;
-    }
-    return false;
-}
-
 Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return NULL;
@@ -82,12 +74,9 @@ LVar *find_lvar(Token *tok) {
 }
 
 Type *basetype() {
-    Token *tok = token;
-
-    if (token->kind == TK_IDENT) {
-        if (consume_type("int")) {
-            return int_type();
-        }
+    if (token->kind == TK_TYPE) {
+        token = token->next;
+        return int_type();
     }
 
     error("Unknown type");
@@ -164,10 +153,10 @@ void declaration() {
 
 Node *function_def() {
     locals = NULL;
-
-    if (!consume_type("int")) {
-        error_at(token->str, "Expected 'int' in function definition");
+    if (token->kind != TK_TYPE) {
+        error_at(token->str, "Expected type in function definition");
     }
+    token = token->next;
 
     Token *tok = consume_ident();
     if (!tok) {
@@ -183,7 +172,10 @@ Node *function_def() {
     int arg_count = 0;
     if (!consume(")")) {
         do {
-            consume_type("int");
+            if (token->kind != TK_TYPE) {
+                error_at(token->str, "Expected type in function argument");
+            }
+            token = token->next;
 
             Token *arg_tok = consume_ident();
             if (!arg_tok) {
@@ -276,8 +268,7 @@ Node *stmt() {
         int i = 0;
 
         while(!consume("}")) {
-            if (token->kind == TK_IDENT &&
-                token->len == 3 && !memcmp(token->str, "int", 3)) {
+            if (token->kind == TK_TYPE) {
                 declaration();
                 continue;
             }

@@ -13,6 +13,29 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     return tok;
 }
 
+ReservedWord reservedWords[] = {
+    {"return", 6, TK_RETURN},
+    {"if", 2, TK_IF},
+    {"else", 4, TK_ELSE},
+    {"while", 5, TK_WHILE},
+    {"for", 3, TK_FOR},
+    {"int", 3, TK_TYPE},
+    {NULL, 0, 0},
+};
+
+TokenKind check_reserved(char *name, int len) {
+    for (int i = 0; reservedWords[i].str != NULL; i++) {
+        ReservedWord *r = &reservedWords[i];
+        if (r->len != len) {
+            continue;
+        }
+        if (!memcmp(name, r->str, len)) {
+            return r->kind;
+        }
+    }
+    return TK_IDENT;
+}
+
 Token *tokenize() {
     char *p = user_input;
     Token head;
@@ -45,44 +68,17 @@ Token *tokenize() {
             continue;
         }
 
-        if (strncmp(p, "if", 2) == 0 && !isalnum(p[2])) {
-            cur = new_token(TK_IF, cur, p, 2);
-            p += 2;
-            continue;
-        }
-
-        if (strncmp(p, "else", 4) == 0 && !isalnum(p[4])) { 
-            cur = new_token(TK_ELSE, cur, p, 4);
-            p += 4;
-            continue;
-        }
-
-        if (strncmp(p, "while", 5) == 0 && !isalnum(p[5])) {
-            cur = new_token(TK_WHILE, cur, p, 5);
-            p += 5;
-            continue;
-        }
-
-        if (strncmp(p, "for", 3) == 0 && !isalnum(p[3])) {
-            cur = new_token(TK_FOR, cur, p, 3);
-            p += 3;
-            continue;
-        }
-
-        if (strncmp(p, "return", 6) == 0 && !isalnum(p[6])) {
-            cur = new_token(TK_RETURN, cur, p, 6);
-            p += 6;
-            continue;
-        }
-
         if (isalpha(*p) || *p == '_') {
             char *start = p;
 
             p++;
             while (isalnum(*p) || *p == '_')
                 p++;
+
+            int len = p - start;
+            TokenKind kind = check_reserved(start, len);
             
-            cur = new_token(TK_IDENT, cur, start, p - start);
+            cur = new_token(kind, cur, start, len);
             continue;
         }
 

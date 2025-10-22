@@ -18,6 +18,14 @@ typedef enum {
     TK_TYPE,
 } TokenKind;
 
+typedef struct {
+    char *str;
+    int len;
+    TokenKind kind;
+} ReservedWord;
+
+TokenKind check_reserved(char *name, int len);
+
 typedef struct Token Token;
 
 struct Token {
