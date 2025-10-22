@@ -113,16 +113,6 @@ Type *ptr_to(Type *base) {
     return type;
 }
 
-int size_of(Type *type) {
-    if (type->ty == INT) {
-        return 8;
-    }
-    if (type->ty == PTR) {
-        return 8;
-    }
-    return 8;
-}
-
 Node *new_node(NodeKind kind) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -164,9 +154,9 @@ void declaration() {
     lvar->next = locals;
 
     if (locals)
-        lvar->offset = locals->offset + size_of(lvar->type);
+        lvar->offset = locals->offset + 8;
     else
-        lvar->offset = size_of(lvar->type);
+        lvar->offset = 8;
     locals = lvar;
 
     expect(";");
@@ -210,11 +200,12 @@ Node *function_def() {
             lvar->type = int_type();  // デフォルトはint型
             
             if (locals) 
-                lvar->offset = locals->offset + size_of(lvar->type);
+                lvar->offset = locals->offset + 8;
             else
-                lvar->offset = size_of(lvar->type);
-            
+                lvar->offset = 8;
+
             arg->offset = lvar->offset;
+            arg->type = lvar->type;
             locals = lvar;
 
             args[arg_count++] = arg;
@@ -358,28 +349,18 @@ Node *add() {
     for(;;) {
         if (consume("+")) {
             Node *rhs = mul();
-            Node *add_node = new_binary(ND_ADD, node, rhs);
-            
-            // ポインタ + 整数 の場合、結果はポインタ型
             if (node->type && node->type->ty == PTR) {
-                add_node->type = node->type;
-            } else if (rhs->type && rhs->type->ty == PTR) {
-                add_node->type = rhs->type;
-            } else {
-                add_node->type = int_type();
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                rhs = new_binary(ND_MUL, rhs, new_num(n));
             }
-            node = add_node;
+            node = new_binary(ND_ADD, node, rhs);
         } else if (consume("-")) {
             Node *rhs = mul();
-            Node *sub_node = new_binary(ND_SUB, node, rhs);
-            
-            // ポインタ - 整数 の場合、結果はポインタ型
             if (node->type && node->type->ty == PTR) {
-                sub_node->type = node->type;
-            } else {
-                sub_node->type = int_type();
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                rhs = new_binary(ND_MUL, rhs, new_num(n));
             }
-            node = sub_node;
+            node = new_binary(ND_SUB, node, rhs);
         } else {
             return node;
         }

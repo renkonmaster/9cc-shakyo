@@ -6,13 +6,6 @@ int count(void) {
     return c++;
 }
 
-int type_size(Type *type) {
-    if (!type) return 8;
-    if (type->ty == INT) return 8;
-    if (type->ty == PTR) return 8;
-    return 8;
-}
-
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {    
         printf("  mov rax, rbp\n");
