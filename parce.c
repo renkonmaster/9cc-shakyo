@@ -81,6 +81,48 @@ LVar *find_lvar(Token *tok) {
     return NULL;
 }
 
+Type *basetype() {
+    Token *tok = token;
+
+    if (token->kind == TK_IDENT) {
+        if (consume_type("int")) {
+            return int_type();
+        }
+    }
+
+    error("Unknown type");
+}
+
+Type *declarater(Type *base) {
+    while(consume("*")) {
+        base = ptr_to(base);
+    }
+    return base;
+}
+
+Type *int_type() {
+    Type *type = calloc(1, sizeof(Type));
+    type->ty = INT;
+    return type;
+}
+
+Type *ptr_to(Type *base) {
+    Type *type = calloc(1, sizeof(Type));
+    type->ty = PTR;
+    type->ptr_to = base;
+    return type;
+}
+
+int size_of(Type *type) {
+    if (type->ty == INT) {
+        return 8;
+    }
+    if (type->ty == PTR) {
+        return 8;
+    }
+    return 8;
+}
+
 Node *new_node(NodeKind kind) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -91,30 +133,40 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = new_node(kind);
     node->lhs = lhs;
     node->rhs = rhs;
+    node->type = int_type();  // デフォルトはint型
     return node;
 }
 
 Node *new_num(int val) {
     Node *node = new_node(ND_NUM);
     node->val = val;
+    node->type = int_type();
     return node;
 }
 
 void declaration() {
-    Token *tok = consume_ident();
-    if (!tok) {
-        error_at(token->str, "Expected variable name");
-        return;
-    }
+    Type *base = basetype();
+    Type *type = declarater(base);
 
-    LVar *lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals;
+    Token *tok = consume_ident();
+    if (!tok) 
+        error_at(token->str, "Expected variable name");
+
+    LVar *lvar = find_lvar(tok);
+    if (lvar)
+        error_at(tok->str, "Variable redeclaration");
+
+    lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
+    lvar->type = type;
+    
+    lvar->next = locals;
+
     if (locals)
-        lvar->offset = locals->offset + 8;
+        lvar->offset = locals->offset + size_of(lvar->type);
     else
-        lvar->offset = 8;
+        lvar->offset = size_of(lvar->type);
     locals = lvar;
 
     expect(";");
@@ -155,11 +207,12 @@ Node *function_def() {
             lvar->next = locals;
             lvar->name = arg_tok->str;
             lvar->len = arg_tok->len;
+            lvar->type = int_type();  // デフォルトはint型
             
             if (locals) 
-                lvar->offset = locals->offset + 8;
+                lvar->offset = locals->offset + size_of(lvar->type);
             else
-                lvar->offset = 8;
+                lvar->offset = size_of(lvar->type);
             
             arg->offset = lvar->offset;
             locals = lvar;
@@ -232,8 +285,10 @@ Node *stmt() {
         int i = 0;
 
         while(!consume("}")) {
-            while (consume_type("int")) {
-            declaration();
+            if (token->kind == TK_IDENT &&
+                token->len == 3 && !memcmp(token->str, "int", 3)) {
+                declaration();
+                continue;
             }
             stmts[i++] = stmt();
         }
@@ -301,12 +356,33 @@ Node *add() {
     Node *node = mul();
 
     for(;;) {
-        if (consume("+"))
-            node = new_binary(ND_ADD, node, mul());
-        else if (consume("-"))
-            node = new_binary(ND_SUB, node, mul());
-        else
+        if (consume("+")) {
+            Node *rhs = mul();
+            Node *add_node = new_binary(ND_ADD, node, rhs);
+            
+            // ポインタ + 整数 の場合、結果はポインタ型
+            if (node->type && node->type->ty == PTR) {
+                add_node->type = node->type;
+            } else if (rhs->type && rhs->type->ty == PTR) {
+                add_node->type = rhs->type;
+            } else {
+                add_node->type = int_type();
+            }
+            node = add_node;
+        } else if (consume("-")) {
+            Node *rhs = mul();
+            Node *sub_node = new_binary(ND_SUB, node, rhs);
+            
+            // ポインタ - 整数 の場合、結果はポインタ型
+            if (node->type && node->type->ty == PTR) {
+                sub_node->type = node->type;
+            } else {
+                sub_node->type = int_type();
+            }
+            node = sub_node;
+        } else {
             return node;
+        }
     }
 }
 
@@ -357,13 +433,16 @@ Node *primary() {
         LVar *lvar = find_lvar(tok);
         if (lvar) {
             node->offset = lvar->offset;
+            node->type = lvar->type;
         } else {
             error_at(tok->str, "Undefined variable");
         }
         return node;
     }
 
-    return new_num(expect_number());
+    Node *node = new_num(expect_number());
+    node->type = int_type();
+    return node;
 }
 
 Node *unary() {
@@ -371,9 +450,21 @@ Node *unary() {
         return unary();
     if (consume("-"))
         return new_binary(ND_SUB, new_num(0), primary());
-    if (consume("*")) 
-        return new_binary(ND_DEREF, unary(), NULL);
-    if (consume("&"))
-        return new_binary(ND_ADDR, unary(), NULL);
+    if (consume("&")) {
+        Node *node = new_node(ND_ADDR);
+        node->lhs = unary();
+        node->type = ptr_to(node->lhs->type);
+        return node;
+    }
+    if (consume("*")) {
+        Node *node = new_node(ND_DEREF);
+        node->lhs = unary();
+        if (node->lhs->type && node->lhs->type->ty == PTR) {
+            node->type = node->lhs->type->ptr_to;
+        } else {
+            node->type = int_type();
+        }
+        return node;
+    }
     return primary();
 }

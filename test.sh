@@ -138,4 +138,26 @@ int main() {
     return *p + *q + 2;
 }"
 
+assert 3 "
+int main() {
+    int x;
+    int *p;
+    p = &x;
+    *p = 3;
+    return x;
+}"
+
+assert 8 "
+int main() {
+    int x;
+    int y;
+    int *p;
+    int *q;
+    p = &x;
+    q = &y;
+    *p = 3;
+    *q = 5;
+    return x + y;
+}"
+
 echo "✅ all tests passed"

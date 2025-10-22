@@ -28,6 +28,13 @@ struct Token {
     int len;
 };
 
+typedef struct Type Type;
+
+struct Type {
+    enum { INT, PTR } ty;
+    struct Type *ptr_to;
+};
+
 typedef struct LVar LVar;
 
 struct LVar {
@@ -35,9 +42,16 @@ struct LVar {
     char *name;
     int len;
     int offset;
+    Type *type;
 };
 
 LVar *find_lvar(Token *tok);
+
+Type *basetype();
+Type *declarater(Type *base);
+Type *int_type();
+Type *ptr_to(Type *base);
+int size_of(Type *type);
 
 void error(char *fmt, ...);
 
@@ -110,6 +124,8 @@ struct Node
     Node **args;
     int arg_count;
     LVar *locals;
+    
+    Type *type;
 };
 
 Node *new_node(NodeKind kind);
