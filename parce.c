@@ -418,6 +418,13 @@ Node *primary() {
 }
 
 Node *unary() {
+    if (consume_kind(TK_SIZEOF)) {
+        Node *node = unary();
+        Node *size_node = new_node(ND_NUM);
+        size_node->val = (node->type->ty == INT) ? 4 : 8;
+        size_node->type = int_type();
+        return size_node;
+    }
     if (consume("+")) 
         return unary();
     if (consume("-"))

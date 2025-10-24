@@ -16,6 +16,7 @@ typedef enum {
     TK_FOR,
     TK_EOF,
     TK_TYPE,
+    TK_SIZEOF,
 } TokenKind;
 
 typedef struct {
@@ -59,7 +60,6 @@ Type *basetype();
 Type *declarater(Type *base);
 Type *int_type();
 Type *ptr_to(Type *base);
-int size_of(Type *type);
 
 void error(char *fmt, ...);
 

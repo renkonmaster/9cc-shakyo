@@ -188,4 +188,28 @@ int main() {
     return *q;
 }"
 
+assert 4 "
+int main() {
+    int x;
+    x = 3;
+    int y;
+    y = sizeof(x);
+    return y;
+}"
+
+assert 8 "
+int main() {
+    int x;
+    x = 3;
+    int y;
+    y = sizeof(&x);
+    return y;
+}"
+
+assert 4 "
+int main() {
+    int x;
+    return sizeof(sizeof(sizeof(x)));
+}"
+
 echo "✅ all tests passed"
