@@ -75,10 +75,12 @@ LVar *find_lvar(Token *tok) {
 
 Type *basetype() {
     if (token->kind == TK_TYPE) {
+        if (strncmp(token->str, "int", token->len) != 0) {
+            error_at(token->str, "Unknown type");
+        }
         token = token->next;
         return int_type();
     }
-
     error("Unknown type");
 }
 
@@ -135,6 +137,16 @@ void declaration() {
     if (lvar)
         error_at(tok->str, "Variable redeclaration");
 
+    while (consume("[")) {
+        int len = expect_number();
+        expect("]");
+        type = calloc(1, sizeof(Type));
+        type->ty = ARRAY;
+        type->array_size = len;
+        type->ptr_to = base;
+        base = type;
+    }
+
     lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
     lvar->len = tok->len;
@@ -189,7 +201,7 @@ Node *function_def() {
             lvar->next = locals;
             lvar->name = arg_tok->str;
             lvar->len = arg_tok->len;
-            lvar->type = int_type();  // デフォルトはint型
+            lvar->type = int_type();
             
             if (locals) 
                 lvar->offset = locals->offset + 8;
@@ -426,9 +438,9 @@ Node *unary() {
         return size_node;
     }
     if (consume("+")) 
-        return unary();
+        return array_to_ptr(unary());
     if (consume("-"))
-        return new_binary(ND_SUB, new_num(0), primary());
+        return new_binary(ND_SUB, new_num(0), array_to_ptr(unary()));
     if (consume("&")) {
         Node *node = new_node(ND_ADDR);
         node->lhs = unary();
@@ -437,7 +449,7 @@ Node *unary() {
     }
     if (consume("*")) {
         Node *node = new_node(ND_DEREF);
-        node->lhs = unary();
+        node->lhs = array_to_ptr(unary());
         if (node->lhs->type && node->lhs->type->ty == PTR) {
             node->type = node->lhs->type->ptr_to;
         } else {
@@ -445,5 +457,14 @@ Node *unary() {
         }
         return node;
     }
-    return primary();
+    Node *node = primary();
+    return array_to_ptr(node);
+}
+
+Node *array_to_ptr(Node *node) {
+    if (!node->type || node->type->ty != ARRAY) {
+        return node;
+    }
+    node->type->ty = PTR;;
+    return node;
 }
