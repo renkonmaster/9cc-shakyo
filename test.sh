@@ -188,17 +188,17 @@ int main() {
     return *q;
 }"
 
-# assert 3 "
-# int sum(int *p, int *q) {
-#     return *p + *q;
-# }
-# int main() {
-#     int x;
-#     x = 1;
-#     int y;
-#     y = 2;
-#     return sum(&x, &y);
-# }"
+assert 3 "
+int sum(int *p, int *q) {
+    return *p + *q;
+}
+int main() {
+    int x;
+    x = 1;
+    int y;
+    y = 2;
+    return sum(&x, &y);
+}"
 
 assert 4 "
 int main() {
@@ -245,19 +245,19 @@ int main() {
     return *arr + *(arr + 1) + *(arr + 2);
 }"
 
-# assert 15 "
-# int sum(int *arr) { 
-#     return *arr + *(arr + 1) + *(arr + 2);
-# }
+assert 15 "
+int sum(int *arr) { 
+    return *arr + *(arr + 1) + *(arr + 2);
+}
 
-# int main() {
-#     int data[3];
+int main() {
+    int data[3];
     
-#     *data = 10;
-#     *(data + 1) = 5;
-#     *(data + 2) = 0;
+    *data = 10;
+    *(data + 1) = 5;
+    *(data + 2) = 0;
     
-#     return sum(data);
-# }"
+    return sum(data);
+}"
 
 echo "✅ all tests passed"

@@ -165,10 +165,8 @@ void declaration() {
 
 Node *function_def() {
     locals = NULL;
-    if (token->kind != TK_TYPE) {
-        error_at(token->str, "Expected type in function definition");
-    }
-    token = token->next;
+    Type *ret_base = basetype();
+    Type *ret_type = declarater(ret_base);
 
     Token *tok = consume_ident();
     if (!tok) {
@@ -178,16 +176,15 @@ Node *function_def() {
     node->kind = ND_FUNCDEF;
     node->funcname = calloc(tok->len + 1, 1);
     memcpy(node->funcname, tok->str, tok->len);
+    node->type = ret_type;
 
     expect("(");
     Node **args = calloc(6, sizeof(Node*));
     int arg_count = 0;
     if (!consume(")")) {
         do {
-            if (token->kind != TK_TYPE) {
-                error_at(token->str, "Expected type in function argument");
-            }
-            token = token->next;
+            Type *base = basetype();
+            Type *type = declarater(base);
 
             Token *arg_tok = consume_ident();
             if (!arg_tok) {
@@ -201,7 +198,7 @@ Node *function_def() {
             lvar->next = locals;
             lvar->name = arg_tok->str;
             lvar->len = arg_tok->len;
-            lvar->type = int_type();
+            lvar->type = type;
             
             if (locals) 
                 lvar->offset = locals->offset + 8;
