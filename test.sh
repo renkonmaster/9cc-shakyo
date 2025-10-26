@@ -260,6 +260,23 @@ int main() {
     return sum(data);
 }"
 
+assert 3 "
+int main() {
+    int a[2];
+    a[0] = 1;
+    a[1] = 2;
+    return a[0] + a[1];
+}"
+
+assert 9 "
+int main() {
+    int a[3];
+    a[0] = 3;
+    a[1] = 5;
+    a[2] = 1;
+    return a[0] + a[1] + a[2];
+}"
+
 assert 57 "
 int a;
 int main() {

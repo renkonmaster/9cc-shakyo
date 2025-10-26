@@ -435,7 +435,6 @@ Node *primary() {
             node->kind = ND_FUNCALL;
             node->funcname = calloc(tok->len + 1, 1);
             memcpy(node->funcname, tok->str, tok->len);
-            // 引数のパース
             Node **args = calloc(6, sizeof(Node*));
             int arg_count = 0;
             if (!consume(")")) {
@@ -462,6 +461,20 @@ Node *primary() {
             node->gvar = gvar;
         } else {
             error_at(tok->str, "Undefined variable");
+        }
+
+        if (consume("[")) {
+            while (!consume("]")) {
+                if (!node->type || node->type->ty != ARRAY) {
+                    error_at(token->str, "Not an array type");
+                }
+                Node *idx = expr();
+                Node *ptr = new_binary(ND_ADD, node, idx);
+                ptr->type = ptr_to(node->type->ptr_to);
+                node = new_node(ND_DEREF);
+                node->lhs = ptr;
+                node->type = node->lhs->type->ptr_to;
+            }
         }
         return node;
     }
