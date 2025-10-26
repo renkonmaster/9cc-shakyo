@@ -57,10 +57,22 @@ struct LVar {
 
 LVar *find_lvar(Token *tok);
 
+typedef struct GVar GVar;
+
+struct GVar {
+    GVar *next;
+    char *name;
+    int len;
+    Type *type;
+};
+
+GVar *find_gvar(Token *tok);
+
 Type *basetype();
 Type *declarater(Type *base);
 Type *int_type();
 Type *ptr_to(Type *base);
+int size_of(Type *type);
 
 void error(char *fmt, ...);
 
@@ -96,6 +108,7 @@ typedef enum {
     ND_NUM,
     ND_ASSIGN,
     ND_LVAR,
+    ND_GVAR,
     ND_RETURN,
     ND_IF,
     ND_WHILE,
@@ -133,7 +146,7 @@ struct Node
     Node **args;
     int arg_count;
     LVar *locals;
-    
+    GVar *gvar;
     Type *type;
 };
 
@@ -144,7 +157,10 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_num(int val);
 
 void program();
-Node *function_def();
+Node *function_def(Type *ret_type, Token *tok);
+Type *declarater(Type *base);
+void declaration();
+void global_declaration(Type *base, Token *tok);
 Node *stmt();
 Node *assign();
 Node *expr();
@@ -173,3 +189,4 @@ extern char *user_input;
 extern Token *token;
 extern Node *functions[100];
 extern int functions_count;
+extern GVar *globals;

@@ -260,4 +260,26 @@ int main() {
     return sum(data);
 }"
 
+assert 57 "
+int a;
+int main() {
+    return 57;
+}"
+
+assert 99 "
+int a;
+int b;
+int main() {
+    a = 40;
+    b = 59;
+    return a + b;
+}"
+
+assert 57 "
+int a;
+int main() { 
+    a = 19;
+    return a * 3;
+}"
+
 echo "✅ all tests passed"

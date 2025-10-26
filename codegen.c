@@ -19,6 +19,12 @@ void gen_lval(Node *node) {
         return;
     }
 
+    if (node->kind == ND_GVAR) {
+        printf("  lea rax, %s[rip]\n", node->gvar->name);
+        printf("  push rax\n");
+        return;
+    }
+
     error("Left value is not variable or dereference");
 }
 
@@ -164,6 +170,12 @@ void gen(Node *node) {
         return;
     case ND_ADDR:
         gen_lval(node->lhs);
+        return;
+    case ND_GVAR:
+        gen_lval(node);
+        printf("  pop rax\n");
+        printf("  mov rax, [rax]\n");
+        printf("  push rax\n");  
         return;
     }
 

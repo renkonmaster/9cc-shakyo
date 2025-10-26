@@ -73,6 +73,15 @@ LVar *find_lvar(Token *tok) {
     return NULL;
 }
 
+GVar *globals = NULL;
+
+GVar *find_gvar(Token *tok) {
+    for (GVar *var = globals; var; var = var->next)
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+            return var;
+    return NULL;
+}
+
 Type *basetype() {
     if (token->kind == TK_TYPE) {
         if (strncmp(token->str, "int", token->len) != 0) {
@@ -95,6 +104,19 @@ Type *int_type() {
     Type *type = calloc(1, sizeof(Type));
     type->ty = INT;
     return type;
+}
+
+int size_of(Type *type) {
+    switch (type->ty) {
+        case INT:
+            return 8;
+        case PTR:
+            return 8;
+        case ARRAY:
+            return type->array_size * size_of(type->ptr_to);
+        default:
+            error("Unknown type");
+    }
 }
 
 Type *ptr_to(Type *base) {
@@ -163,22 +185,15 @@ void declaration() {
     expect(";");
 }
 
-Node *function_def() {
+Node *function_def(Type *ret_type, Token *tok) {
     locals = NULL;
-    Type *ret_base = basetype();
-    Type *ret_type = declarater(ret_base);
 
-    Token *tok = consume_ident();
-    if (!tok) {
-        error_at(token->str, "Expected function name");
-    }
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_FUNCDEF;
     node->funcname = calloc(tok->len + 1, 1);
     memcpy(node->funcname, tok->str, tok->len);
     node->type = ret_type;
 
-    expect("(");
     Node **args = calloc(6, sizeof(Node*));
     int arg_count = 0;
     if (!consume(")")) {
@@ -222,10 +237,35 @@ Node *function_def() {
     return node;
 }
 
+void global_declaration(Type *base, Token *tok) {
+    GVar *gvar = find_gvar(tok);
+    if (gvar)
+        error_at(tok->str, "Global variable redeclaration");
+    
+    gvar = calloc(1, sizeof(GVar));
+    gvar->name = calloc(tok->len + 1, 1);
+    memcpy(gvar->name, tok->str, tok->len);
+    gvar->type = base;
+    gvar->next = globals;
+    gvar->len = tok->len;
+    globals = gvar;
+    expect(";");
+}
+
 void program() {
-    int i = 0;
     while (!at_eof()) {
-        functions[functions_count++] = function_def();
+        Type *base = basetype();
+        Type *type = declarater(base);
+
+        Token *tok = consume_ident();
+        if (!tok)
+            error_at(token->str, "Expected function name");
+        
+        if (consume("(")) {
+            functions[functions_count++] = function_def(type, tok);
+        } else {
+            global_declaration(type, tok);
+        }
     }
 }
 
@@ -409,12 +449,17 @@ Node *primary() {
             return node;
         }
 
-        node->kind = ND_LVAR;
-
+        
         LVar *lvar = find_lvar(tok);
+        GVar *gvar = find_gvar(tok);
         if (lvar) {
+            node->kind = ND_LVAR;
             node->offset = lvar->offset;
             node->type = lvar->type;
+        } else if (gvar) {
+            node->kind = ND_GVAR;
+            node->type = gvar->type;
+            node->gvar = gvar;
         } else {
             error_at(tok->str, "Undefined variable");
         }
