@@ -20,6 +20,7 @@ ReservedWord reservedWords[] = {
     {"while", 5, TK_WHILE},
     {"for", 3, TK_FOR},
     {"int", 3, TK_TYPE},
+    {"char", 4, TK_TYPE},
     {"sizeof", 6, TK_SIZEOF},
     {NULL, 0, 0},
 };

@@ -7,7 +7,7 @@ int count(void) {
 }
 
 void gen_lval(Node *node) {
-    if (node->kind == ND_LVAR) {    
+    if (node->kind == ND_LVAR) {
         printf("  mov rax, rbp\n");
         printf("  sub rax, %d\n", node->offset);
         printf("  push rax\n");
@@ -150,8 +150,12 @@ void gen(Node *node) {
     case ND_LVAR:
         gen_lval(node);
         printf("  pop rax\n");
-        printf("  mov rax, [rax]\n");
-        printf("  push rax\n");  
+        if (node->type->ty == CHAR) {
+            printf("  movsx rax, byte ptr [rax]\n");
+        } else {
+            printf("  mov rax, [rax]\n");
+        }
+        printf("  push rax\n");
         return;
     case ND_ASSIGN:
         gen_lval(node->lhs);
@@ -159,7 +163,11 @@ void gen(Node *node) {
 
         printf("  pop rdi\n");
         printf("  pop rax\n");
-        printf("  mov [rax], rdi\n");
+        if (node->type->ty == CHAR) {
+            printf("  mov [rax], dil\n");
+        } else {
+            printf("  mov [rax], rdi\n");
+        }
         printf("  push rdi\n");
         return;
     case ND_DEREF:

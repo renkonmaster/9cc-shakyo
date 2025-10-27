@@ -84,11 +84,17 @@ GVar *find_gvar(Token *tok) {
 
 Type *basetype() {
     if (token->kind == TK_TYPE) {
-        if (strncmp(token->str, "int", token->len) != 0) {
+        Type *type;
+        if (token->len == 3 && !memcmp(token->str, "int", 3)) {
+            type = int_type();
+        } else if (token->len == 4 && !memcmp(token->str, "char", 4)) {
+            type = calloc(1, sizeof(Type));
+            type->ty = CHAR;
+        } else {
             error_at(token->str, "Unknown type");
         }
         token = token->next;
-        return int_type();
+        return type;
     }
     error("Unknown type");
 }
@@ -114,6 +120,8 @@ int size_of(Type *type) {
             return 8;
         case ARRAY:
             return type->array_size * size_of(type->ptr_to);
+        case CHAR:
+            return 1;
         default:
             error("Unknown type");
     }
@@ -460,7 +468,7 @@ Node *primary() {
             node->type = gvar->type;
             node->gvar = gvar;
         } else {
-            error_at(tok->str, "Undefined variable");
+            error_at(tok->str, "Undefined variable, in primary");
         }
 
         if (consume("[")) {
