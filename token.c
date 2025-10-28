@@ -45,6 +45,17 @@ Token *tokenize() {
     Token *cur = &head;
 
     while(*p) {
+
+        if (*p == '"') {
+            char *start = ++p;
+            while (*p && *p != '"') {
+                p++;
+            }
+            cur = new_token(TK_STR, cur, start, p - start);
+            p++;
+            continue;
+        }
+
         if (isspace(*p)) {
             p++;
             continue;

@@ -1,5 +1,10 @@
 #include "9cc.h"
 
+LVar *locals = NULL;
+GVar *globals = NULL;
+int functions_count = 0;
+StringLiteral *string_literals = NULL;
+
 void error(char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
@@ -64,16 +69,12 @@ bool at_eof() {
     return token->kind == TK_EOF;
 }
 
-LVar *locals = NULL;
-
 LVar *find_lvar(Token *tok) {
     for (LVar *var = locals; var; var = var->next) 
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)) 
             return var;
     return NULL;
 }
-
-GVar *globals = NULL;
 
 GVar *find_gvar(Token *tok) {
     for (GVar *var = globals; var; var = var->next)
@@ -484,6 +485,20 @@ Node *primary() {
                 node->type = node->lhs->type->ptr_to;
             }
         }
+        return node;
+    }
+
+    if (token->kind == TK_STR) {
+        Token *str_tok = token;
+        token = token->next;
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_STRING;
+        StringLiteral *strlit = calloc(1, sizeof(StringLiteral));
+        node->str = strlit;
+        strlit->contents = calloc(str_tok->len + 1, 1);
+        memcpy(strlit->contents, str_tok->str, str_tok->len);
+        strlit->next = string_literals;
+        string_literals = strlit;
         return node;
     }
 

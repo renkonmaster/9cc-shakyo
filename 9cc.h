@@ -17,6 +17,7 @@ typedef enum {
     TK_EOF,
     TK_TYPE,
     TK_SIZEOF,
+    TK_STR,
 } TokenKind;
 
 typedef struct {
@@ -68,6 +69,13 @@ struct GVar {
 
 GVar *find_gvar(Token *tok);
 
+typedef struct StringLiteral StringLiteral;
+struct StringLiteral {
+    StringLiteral *next;
+    char *contents;
+    int id;
+};
+
 Type *basetype();
 Type *declarater(Type *base);
 Type *int_type();
@@ -118,6 +126,7 @@ typedef enum {
     ND_FUNCDEF,
     ND_ADDR,
     ND_DEREF,
+    ND_STRING,
 } NodeKind;
 
 typedef struct Node Node;
@@ -148,6 +157,7 @@ struct Node
     LVar *locals;
     GVar *gvar;
     Type *type;
+    StringLiteral *str;
 };
 
 Node *new_node(NodeKind kind);
@@ -190,3 +200,4 @@ extern Token *token;
 extern Node *functions[100];
 extern int functions_count;
 extern GVar *globals;
+extern StringLiteral *string_literals;

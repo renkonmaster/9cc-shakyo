@@ -312,4 +312,16 @@ int main() {
     return x[0] + y;  
 }"
 
+# string literals test
+assert 25 '
+int main() {
+    char *s;
+    char *c;
+    c = " ignored ";
+    s = "Hello";
+    return 25;
+}'
+
+assert 0 'int main() { char *s; s = "Hello world!"; printf("%s\n", s); return 0; }'
+
 echo "✅ all tests passed"

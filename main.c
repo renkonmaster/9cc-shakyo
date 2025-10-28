@@ -3,7 +3,6 @@
 char *user_input;
 Token *token;
 Node *functions[100];
-int functions_count = 0;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -20,6 +19,13 @@ int main(int argc, char **argv) {
     printf(".section .note.GNU-stack,\"\",@progbits\n");
 
     printf(".data\n");
+    for (StringLiteral *str = string_literals; str; str = str->next) {
+        static int str_count = 0;
+        str->id = str_count;
+        printf(".LC%d:\n", str_count++);
+        printf("  .string \"%s\"\n", str->contents);
+    }
+
     for (GVar *gvar = globals; gvar; gvar = gvar->next) {
         printf("%s:\n", gvar->name);
         printf("  .zero %d\n", 8);

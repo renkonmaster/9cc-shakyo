@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 void alloc4(int **p, int a, int b, int c, int d) {
     *p = malloc(4 * sizeof(int));
