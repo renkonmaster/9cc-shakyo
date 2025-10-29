@@ -324,4 +324,6 @@ int main() {
 
 assert 0 'int main() { char *s; s = "Hello world!"; printf("%s\n", s); return 0; }'
 
+assert 0 'int main() { char *s; s = "Hello World!"; printf("%c", s[0]); return 0; }'
+
 echo "✅ all tests passed"

@@ -113,6 +113,12 @@ Type *int_type() {
     return type;
 }
 
+Type *char_type() {
+    Type *type = calloc(1, sizeof(Type));
+    type->ty = CHAR;
+    return type;
+}
+
 int size_of(Type *type) {
     switch (type->ty) {
         case INT:
@@ -474,7 +480,7 @@ Node *primary() {
 
         if (consume("[")) {
             while (!consume("]")) {
-                if (!node->type || node->type->ty != ARRAY) {
+                if (!node->type || node->type->ty != ARRAY && node->type->ty != PTR) {
                     error_at(token->str, "Not an array type");
                 }
                 Node *idx = expr();
@@ -499,6 +505,8 @@ Node *primary() {
         memcpy(strlit->contents, str_tok->str, str_tok->len);
         strlit->next = string_literals;
         string_literals = strlit;
+
+        node->type = ptr_to(char_type());
         return node;
     }
 
