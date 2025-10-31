@@ -1,6 +1,8 @@
 *~
 *.o
+*.log
 tmp*
 a.out
 9cc
 .vscode
+build/
