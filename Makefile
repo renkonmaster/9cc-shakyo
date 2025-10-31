@@ -1,16 +1,24 @@
 CFLAGS=-std=c11 -g -static
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+CC=gcc
+SRCS=$(wildcard src/*.c src/lib/*.c)
+OBJS=$(patsubst src/%.c,build/%.o,$(SRCS))
 
-9cc: $(OBJS)
-		$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+all: build/9cc
 
-$(OBJS): 9cc.h
+build/9cc: $(OBJS) | build
+		$(CC) -o $@ $(OBJS) $(LDFLAGS)
 
-test: 9cc
-		./test.sh
+build:
+	mkdir -p build
+
+build/%.o: src/%.c | build
+		mkdir -p $(dir $@)
+		$(CC) $(CFLAGS) -c $< -o $@
+
+test: build/9cc
+		./test/test.sh
 
 clean:
-		rm -f 9cc *.o *~ tmp*
+		rm -rf build
 
 .PHONY: test clean

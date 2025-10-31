@@ -3,9 +3,9 @@ assert(){
     expected="$1"
     input="$2"
 
-    ./9cc "$input" > tmp.s
-    cc -o tmp tmp.s func.o
-    ./tmp
+    ./build/9cc "$input" > build/tmp.s
+    cc -o build/tmp build/tmp.s build/lib/*.o
+    ./build/tmp
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
