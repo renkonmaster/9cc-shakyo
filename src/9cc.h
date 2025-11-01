@@ -7,10 +7,6 @@
 
 #include "type.h"
 
-void error(char *fmt, ...);
-
-int count();
-
 extern Token *token;
 extern Node *functions[100];
 extern int functions_count;

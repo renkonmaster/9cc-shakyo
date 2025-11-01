@@ -1,4 +1,5 @@
 #include "tokenize.h"
+#include "util.h"
 
 bool startswith(char *p, char *q) {
     return memcmp(p, q, strlen(q)) == 0;

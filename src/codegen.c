@@ -1,10 +1,7 @@
 #include "codegen.h"
-static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  
+#include "util.h"
 
-int count(void) {
-    static int c = 0;
-    return c++;
-}
+static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  
 
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {

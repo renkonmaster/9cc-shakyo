@@ -1,0 +1,14 @@
+#include "util.h"
+
+void error(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
+int count(void) {
+    static int c = 0;
+    return c++;
+}

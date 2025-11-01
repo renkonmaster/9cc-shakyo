@@ -1,6 +1,7 @@
 #include "tokenize.h"
 #include "parse.h"
 #include "codegen.h"
+#include "util.h"
 
 Token *token;
 Node *functions[100];

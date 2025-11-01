@@ -1,17 +1,10 @@
 #include "parse.h"
+#include "util.h"
 
 LVar *locals = NULL;
 GVar *globals = NULL;
 int functions_count = 0;
 StringLiteral *string_literals = NULL;
-
-void error(char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
 
 bool consume(char *op) {
     if (token->kind != TK_RESERVED || 
