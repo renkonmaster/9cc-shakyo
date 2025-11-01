@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "parse.h"
 
 LVar *locals = NULL;
 GVar *globals = NULL;
@@ -8,19 +8,6 @@ StringLiteral *string_literals = NULL;
 void error(char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
-
-void error_at(char *loc, char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-
-    int pos = loc - user_input;
-    fprintf(stderr, "%s\n", user_input);
-    fprintf(stderr, "%*s", pos, " ");
-    fprintf(stderr, "^ ");
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
     exit(1);
@@ -53,13 +40,13 @@ bool consume_kind(TokenKind kind) {
 void expect(char *op) {
     if (token->kind != TK_RESERVED || strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
-        error_at(token->str, "expected \"%s\"", op);
+        error(token->str);
     token = token->next;
 }
 
 int expect_number() {
     if (token->kind != TK_NUM)
-        error_at(token->str, "Expected a number");
+        error(token->str);
     int val = token->val;
     token = token->next;
     return val;
@@ -92,7 +79,7 @@ Type *basetype() {
             type = calloc(1, sizeof(Type));
             type->ty = CHAR;
         } else {
-            error_at(token->str, "Unknown type");
+            error(token->str);
         }
         token = token->next;
         return type;
@@ -155,7 +142,7 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
     return node;
 }
 
-Node *new_num(int val) {
+Node *new_node_num(int val) {
     Node *node = new_node(ND_NUM);
     node->val = val;
     node->type = int_type();
@@ -167,12 +154,12 @@ void declaration() {
     Type *type = declarater(base);
 
     Token *tok = consume_ident();
-    if (!tok) 
-        error_at(token->str, "Expected variable name");
+    if (!tok)
+        error(token->str);
 
     LVar *lvar = find_lvar(tok);
     if (lvar)
-        error_at(tok->str, "Variable redeclaration");
+        error(tok->str);
 
     while (consume("[")) {
         int len = expect_number();
@@ -218,7 +205,7 @@ Node *function_def(Type *ret_type, Token *tok) {
 
             Token *arg_tok = consume_ident();
             if (!arg_tok) {
-                error_at(token->str, "Expected argument name");
+                error(token->str);
             }
 
             Node *arg = calloc(1, sizeof(Node));
@@ -255,7 +242,7 @@ Node *function_def(Type *ret_type, Token *tok) {
 void global_declaration(Type *base, Token *tok) {
     GVar *gvar = find_gvar(tok);
     if (gvar)
-        error_at(tok->str, "Global variable redeclaration");
+        error(tok->str);
     
     gvar = calloc(1, sizeof(GVar));
     gvar->name = calloc(tok->len + 1, 1);
@@ -274,7 +261,7 @@ void program() {
 
         Token *tok = consume_ident();
         if (!tok)
-            error_at(token->str, "Expected function name");
+            error(token->str);
         
         if (consume("(")) {
             functions[functions_count++] = function_def(type, tok);
@@ -406,14 +393,14 @@ Node *add() {
             Node *rhs = mul();
             if (node->type && node->type->ty == PTR) {
                 int n = node->type->ptr_to->ty == INT ? 4 : 8;
-                rhs = new_binary(ND_MUL, rhs, new_num(n));
+                rhs = new_binary(ND_MUL, rhs, new_node_num(n));
             }
             node = new_binary(ND_ADD, node, rhs);
         } else if (consume("-")) {
             Node *rhs = mul();
             if (node->type && node->type->ty == PTR) {
                 int n = node->type->ptr_to->ty == INT ? 4 : 8;
-                rhs = new_binary(ND_MUL, rhs, new_num(n));
+                rhs = new_binary(ND_MUL, rhs, new_node_num(n));
             }
             node = new_binary(ND_SUB, node, rhs);
         } else {
@@ -475,13 +462,13 @@ Node *primary() {
             node->type = gvar->type;
             node->gvar = gvar;
         } else {
-            error_at(tok->str, "Undefined variable, in primary");
+            error(tok->str);
         }
 
         if (consume("[")) {
             while (!consume("]")) {
                 if (!node->type || node->type->ty != ARRAY && node->type->ty != PTR) {
-                    error_at(token->str, "Not an array type");
+                    error(token->str);
                 }
                 Node *idx = expr();
                 Node *ptr = new_binary(ND_ADD, node, idx);
@@ -510,7 +497,7 @@ Node *primary() {
         return node;
     }
 
-    Node *node = new_num(expect_number());
+    Node *node = new_node_num(expect_number());
     node->type = int_type();
     return node;
 }
@@ -526,7 +513,7 @@ Node *unary() {
     if (consume("+")) 
         return array_to_ptr(unary());
     if (consume("-"))
-        return new_binary(ND_SUB, new_num(0), array_to_ptr(unary()));
+        return new_binary(ND_SUB, new_node_num(0), array_to_ptr(unary()));
     if (consume("&")) {
         Node *node = new_node(ND_ADDR);
         node->lhs = unary();

@@ -1,6 +1,7 @@
-#include "9cc.h"
+#include "tokenize.h"
+#include "parse.h"
+#include "codegen.h"
 
-char *user_input;
 Token *token;
 Node *functions[100];
 
@@ -10,8 +11,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    user_input = argv[1];
-    token = tokenize();
+    char *user_input = argv[1];
+    token = tokenize(user_input);
 
     program();
 

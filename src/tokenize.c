@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "tokenize.h"
 
 bool startswith(char *p, char *q) {
     return memcmp(p, q, strlen(q)) == 0;
@@ -38,8 +38,7 @@ TokenKind check_reserved(char *name, int len) {
     return TK_IDENT;
 }
 
-Token *tokenize() {
-    char *p = user_input;
+Token *tokenize(char *p) {
     Token head;
     head.next = NULL;
     Token *cur = &head;
@@ -95,7 +94,7 @@ Token *tokenize() {
             continue;
         }
 
-        error_at(p, "invalid token");
+        error(p, "invalid token");
     }
 
     new_token(TK_EOF, cur, p, 0);

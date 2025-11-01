@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "codegen.h"
 static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  
 
 int count(void) {
