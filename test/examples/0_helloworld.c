@@ -1,0 +1,1 @@
+int main() { char *s; s = "Hello world!"; printf("%s\n", s); return 0; }

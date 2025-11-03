@@ -2,17 +2,17 @@
 #include "parse.h"
 #include "codegen.h"
 #include "util.h"
+#include "read.h"
 
 Token *token;
 Node *functions[100];
 
 int main(int argc, char **argv) {
     if (argc != 2) {
-        error("%s: invalid number of arguments", argv[0]);
-        return 1;
+        error("Usage: 9cc <filename>");
     }
 
-    char *user_input = argv[1];
+    char *user_input = read_file(argv[1]);
     token = tokenize(user_input);
 
     program();
