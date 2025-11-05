@@ -299,6 +299,8 @@ void global_declaration(Type *base, Token *tok) {
             init_node->val = val;
             init_node->type = int_type();
             gvar->init = init_node;
+        } else if (init_expr->kind == ND_STRING) {
+            gvar->init = init_expr;
         }
     } else {
         expect(";");

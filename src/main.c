@@ -11,9 +11,13 @@ void gen_Gvar() {
     for (GVar *gvar = globals; gvar; gvar = gvar->next) {
         printf("%s:\n", gvar->name);
         int sz = size_of(gvar->type);
-        if (gvar->init) {
-            switch (sz)
-            {
+        if (!gvar->init) {
+            printf("  .zero %d\n", sz);
+            continue;
+        }
+        
+        if (gvar->init->kind == ND_NUM) {
+            switch (sz) {
             case 1:
                 printf("  .byte %d\n", (int)(gvar->init->val));
                 break;
@@ -26,9 +30,10 @@ void gen_Gvar() {
             default:
                 break;
             }
-            printf("  .quad %d\n", gvar->init->val);
-        }else {
-            printf("  .zero %d\n", sz);
+        } else if (gvar->init->kind == ND_STRING) {
+            printf("  .quad .LC%d\n", gvar->init->str->id);
+        } else {
+            error("Unsupported global variable initializer");
         }
     }
 }
@@ -57,8 +62,8 @@ int main(int argc, char **argv) {
 
     printf(".data\n");
 
-    gen_Gvar();
     gen_StringLiteral();
+    gen_Gvar();
 
     printf(".text\n");
     printf(".global main\n");

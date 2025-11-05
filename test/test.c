@@ -2,6 +2,8 @@ int a = 2 * 5 - 30 + 80 / 4;
 int b = - 5 + 10;
 int c = -255;
 
+char* s = "global string\n";
+
 int hoge() {
     return 42;
 }
