@@ -16,7 +16,9 @@ build/%.o: src/%.c | build
 		$(CC) $(CFLAGS) -c $< -o $@
 
 test: build/9cc
-		./test/test.sh
+		./build/9cc ./test/test.c > build/tmp.s
+		$(CC) -o build/tmp build/tmp.s build/lib/*.o
+		./build/tmp
 
 clean:
 		rm -rf build *~ *.o tmp*
