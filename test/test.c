@@ -13,6 +13,14 @@ int foo(int a, int b) {
     return 2* a + b;
 }
 
+int test_pointer() {
+    int x;
+    x = 3;
+    int *p;
+    p = &x;
+    return *p + 2;
+}
+
 int main() {
     //一度にすべてのテストコードをコンパイルする
     if (42 != hoge()) {
@@ -24,6 +32,10 @@ int main() {
     }
 
     if (foo(3, 4) != 10) {
+        return 1;
+    }
+
+    if (test_pointer() != 5) {
         return 1;
     }
 

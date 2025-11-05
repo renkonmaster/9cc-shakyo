@@ -150,7 +150,7 @@ void gen(Node *node) {
         if (node->type->ty == CHAR) {
             printf("  movsx rax, byte ptr [rax]\n");
         } else {
-            printf("  mov rax, [rax]\n");
+            printf("  mov rax, qword ptr [rax]\n");
         }
         printf("  push rax\n");
         return;
@@ -161,9 +161,9 @@ void gen(Node *node) {
         printf("  pop rdi\n");
         printf("  pop rax\n");
         if (node->type->ty == CHAR) {
-            printf("  mov [rax], dil\n");
+            printf("  mov byte ptr [rax], dil\n");
         } else {
-            printf("  mov [rax], rdi\n");
+            printf("  mov qword ptr [rax], rdi\n");
         }
         printf("  push rdi\n");
         return;
@@ -179,7 +179,11 @@ void gen(Node *node) {
     case ND_GVAR:
         gen_lval(node);
         printf("  pop rax\n");
-        printf("  mov rax, [rax]\n");
+        if (node->gvar->type->ty == CHAR) {
+            printf("  movsx rax, byte ptr [rax]\n");
+        } else {
+            printf("  mov rax, qword ptr [rax]\n");
+        }
         printf("  push rax\n");  
         return;
     case ND_STRING:
