@@ -30,7 +30,26 @@ int main(int argc, char **argv) {
 
     for (GVar *gvar = globals; gvar; gvar = gvar->next) {
         printf("%s:\n", gvar->name);
-        printf("  .zero %d\n", 8);
+        int sz = size_of(gvar->type);
+        if (gvar->init) {
+            switch (sz)
+            {
+            case 1:
+                printf("  .byte %d\n", (int)(gvar->init->val));
+                break;
+            case 4:
+                printf("  .long %d\n", (int)(gvar->init->val));
+                break;
+            case 8:
+                printf("  .quad %d\n", (int)(gvar->init->val));
+                break;
+            default:
+                break;
+            }
+            printf("  .quad %d\n", gvar->init->val);
+        }else {
+            printf("  .zero %d\n", sz);
+        }
     }
 
     printf(".text\n");

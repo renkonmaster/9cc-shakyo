@@ -60,6 +60,7 @@ struct GVar {
     char *name;
     int len;
     Type *type;
+    Node *init;
 };
 
 struct StringLiteral {

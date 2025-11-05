@@ -32,5 +32,6 @@ Node *array_to_ptr(Node *node);
 
 LVar *find_lvar(Token *tok);
 GVar *find_gvar(Token *tok);
+bool eval_const(Node *node, int *val);
 
 #endif

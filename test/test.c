@@ -1,3 +1,7 @@
+int a = 2 * 5 - 30 + 80 / 4;
+int b = - 5 + 10;
+int c = -255;
+
 int hoge() {
     return 42;
 }
@@ -16,6 +20,18 @@ int main() {
     }
 
     if (0 != test_string()) {
+        return 1;
+    }
+
+    if (0 != a) {
+        return 1;
+    }
+
+    if (5 != b) {
+        return 1;
+    }
+
+    if (-255 != c) {
         return 1;
     }
 

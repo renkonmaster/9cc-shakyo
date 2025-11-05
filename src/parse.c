@@ -232,6 +232,49 @@ Node *function_def(Type *ret_type, Token *tok) {
     return node;
 }
 
+bool eval_const(Node *node, int *out) {
+    if (!node) return false;
+    int a, b;
+    switch (node->kind) {
+    case ND_NUM:
+        *out = node->val;
+        return true;
+    case ND_ADD:
+        if (eval_const(node->lhs, &a) && eval_const(node->rhs, &b)) {
+            *out = a + b;
+            return true;
+        }
+        return false;
+    case ND_SUB:
+        if (node->lhs && node->rhs){
+            if (eval_const(node->lhs, &a) && eval_const(node->rhs, &b)) {
+                *out = a - b;
+                return true;
+            }
+        } else if (!node->lhs && node->rhs) {
+            if (eval_const(node->rhs, &b)) {
+                *out = -b;
+                return true;
+            }
+        }
+        return false;
+    case ND_MUL:
+        if (eval_const(node->lhs, &a) && eval_const(node->rhs, &b)) {
+            *out = a * b;
+            return true;
+        }
+        return false;
+    case ND_DIV:
+        if (eval_const(node->lhs, &a) && eval_const(node->rhs, &b)) {
+            *out = a / b;
+            return true;
+        }
+        return false;
+    default:
+        return false;
+    }
+}
+
 void global_declaration(Type *base, Token *tok) {
     GVar *gvar = find_gvar(tok);
     if (gvar)
@@ -244,7 +287,22 @@ void global_declaration(Type *base, Token *tok) {
     gvar->next = globals;
     gvar->len = tok->len;
     globals = gvar;
-    expect(";");
+    gvar->init = NULL;
+    // グローバル変数の初期化に対応
+    if (consume("=")) {
+        Node *init_expr = expr();
+        expect(";");
+
+        int val;
+        if (eval_const(init_expr, &val)) {
+            Node *init_node = new_node(ND_NUM);
+            init_node->val = val;
+            init_node->type = int_type();
+            gvar->init = init_node;
+        }
+    } else {
+        expect(";");
+    }
 }
 
 void program() {
