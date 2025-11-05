@@ -19,6 +19,6 @@ test: build/9cc
 		./test/test.sh
 
 clean:
-		rm -rf build
+		rm -rf build *~ *.o tmp*
 
 .PHONY: test clean
