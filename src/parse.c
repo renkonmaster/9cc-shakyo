@@ -154,14 +154,14 @@ void declaration() {
     if (lvar)
         error(tok->str);
 
-    while (consume("[")) {
+    if (consume("[")) {
         int len = expect_number();
         expect("]");
-        type = calloc(1, sizeof(Type));
-        type->ty = ARRAY;
-        type->array_size = len;
-        type->ptr_to = base;
-        base = type;
+        Type *t = calloc(1, sizeof(Type));
+        t->ty = ARRAY;
+        t->array_size = len;
+        t->ptr_to = base;
+        type = t;
     }
 
     lvar = calloc(1, sizeof(LVar));
@@ -170,11 +170,7 @@ void declaration() {
     lvar->type = type;
     
     lvar->next = locals;
-
-    if (locals)
-        lvar->offset = locals->offset + 8;
-    else
-        lvar->offset = 8;
+    lvar->offset = locals ? locals->offset + 8 : 8;
     locals = lvar;
 
     expect(";");
@@ -459,17 +455,15 @@ Node *primary() {
         }
 
         if (consume("[")) {
-            while (!consume("]")) {
-                if (!node->type || node->type->ty != ARRAY && node->type->ty != PTR) {
-                    error(token->str);
-                }
-                Node *idx = expr();
-                Node *ptr = new_binary(ND_ADD, node, idx);
-                ptr->type = ptr_to(node->type->ptr_to);
-                node = new_node(ND_DEREF);
-                node->lhs = ptr;
-                node->type = node->lhs->type->ptr_to;
+            if (!node->type || node->type->ty != ARRAY && node->type->ty != PTR) {
+                error(token->str);
             }
+            Node *idx = expr();
+            expect("]");
+            Node *ptr = new_binary(ND_ADD, node, new_binary(ND_MUL, idx, new_node_num(size_of(node->type->ptr_to))));
+            ptr->type = ptr_to(node->type->ptr_to);
+            node = new_binary(ND_DEREF, ptr, NULL);
+            node->type = node->lhs->type->ptr_to;
         }
         return node;
     }
