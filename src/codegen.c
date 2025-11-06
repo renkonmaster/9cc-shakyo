@@ -6,7 +6,7 @@ static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {
         printf("  mov rax, rbp\n");
-        printf("  sub rax, %d\n", node->offset);
+        printf("  lea rax, [rax-%d]\n", node->offset);
         printf("  push rax\n");
         return;
     }
@@ -97,7 +97,19 @@ void gen_funcdef(Node *node){
     printf("%s:\n", node->funcname);
     printf("  push rbp\n");
     printf("  mov rbp , rsp\n");
-    printf("  sub rsp, 208\n");
+
+    int stack_size = 0;
+    for (LVar *lvar = node->locals; lvar; lvar = lvar->next) {
+        if (lvar->type->ty == ARRAY) {
+            stack_size += (lvar->type->array_size) * (size_of(lvar->type->ptr_to));
+        } else {
+            stack_size += size_of(lvar->type);
+        }
+    }
+
+    stack_size = (stack_size + 15) / 16 * 16;
+
+    printf("  sub rsp, %d\n", stack_size);
 
     for (int i = 0; i < node->arg_count; i++) {
         Node *arg = node->args[i];
