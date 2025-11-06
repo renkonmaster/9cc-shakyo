@@ -119,10 +119,6 @@ void gen_funcdef(Node *node){
     }
 
     gen(node->body);
-
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
 }
 
 void gen(Node *node) {
