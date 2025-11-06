@@ -21,6 +21,14 @@ int test_pointer() {
     return *p + 2;
 }
 
+int test_arr() {
+    int arr[3];
+    arr[0] = 10;
+    arr[1] = 20;
+    arr[2] = 30;
+    return 0;
+}
+
 int main() {
     //一度にすべてのテストコードをコンパイルする
     if (42 != hoge()) {

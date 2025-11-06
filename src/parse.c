@@ -102,7 +102,7 @@ Type *char_type() {
 int size_of(Type *type) {
     switch (type->ty) {
         case INT:
-            return 8;
+            return 4;
         case PTR:
             return 8;
         case ARRAY:
@@ -381,14 +381,14 @@ Node *add() {
         if (consume("+")) {
             Node *rhs = mul();
             if (node->type && node->type->ty == PTR) {
-                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                int n = size_of(node->type->ptr_to);
                 rhs = new_binary(ND_MUL, rhs, new_node_num(n));
             }
             node = new_binary(ND_ADD, node, rhs);
         } else if (consume("-")) {
             Node *rhs = mul();
             if (node->type && node->type->ty == PTR) {
-                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                int n = size_of(node->type->ptr_to);
                 rhs = new_binary(ND_MUL, rhs, new_node_num(n));
             }
             node = new_binary(ND_SUB, node, rhs);
