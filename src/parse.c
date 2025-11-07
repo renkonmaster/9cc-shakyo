@@ -131,7 +131,29 @@ Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = new_node(kind);
     node->lhs = lhs;
     node->rhs = rhs;
-    node->type = int_type();  // デフォルトはint型
+
+    switch (kind) {
+    case ND_ASSIGN:
+        if (lhs && lhs->type) node->type = lhs->type;
+        break;
+    case ND_ADD:
+    case ND_SUB:
+        if (lhs && lhs->type && lhs->type->ty == PTR) {
+           node->type = lhs->type;
+        } else if (rhs && rhs->type && rhs->type->ty == PTR) {
+            node->type = rhs->type;
+        } else {
+            node->type = int_type();
+        }
+        break;
+    case ND_MUL:
+    case ND_DIV:
+        node->type = int_type();
+        break;
+    default:
+        node->type = int_type();
+        break;
+    }
     return node;
 }
 
@@ -496,6 +518,8 @@ Node *primary() {
             }
             node->args = args;
             node->arg_count = arg_count;
+            //返り値をint型とする
+            node->type = int_type();
             return node;
         }
 
@@ -585,6 +609,6 @@ Node *array_to_ptr(Node *node) {
     if (!node->type || node->type->ty != ARRAY) {
         return node;
     }
-    node->type->ty = PTR;;
+    node->type = ptr_to(node->type->ptr_to);
     return node;
 }

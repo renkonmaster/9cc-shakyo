@@ -5,8 +5,7 @@ static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {
-        printf("  mov rax, rbp\n");
-        printf("  lea rax, [rax-%d]\n", node->offset);
+        printf("  lea rax, [rbp-%d]\n", node->offset);
         printf("  push rax\n");
         return;
     }
@@ -107,15 +106,15 @@ void gen_funcdef(Node *node){
         }
     }
 
-    stack_size = (stack_size + 15) / 16 * 16;
+    int aligned = (stack_size + 15) / 16 * 16;
 
-    printf("  sub rsp, %d\n", stack_size);
+    if (aligned > 0) 
+        printf("  sub rsp, %d\n", aligned);
 
     for (int i = 0; i < node->arg_count; i++) {
         Node *arg = node->args[i];
-        printf("  mov rax, rbp\n");
-        printf("  sub rax, %d\n", arg->offset);
-        printf("  mov [rax], %s\n", argregs[i]);
+        printf("  lea rax, [rbp-%d]\n", arg->offset);
+        printf("  mov qword ptr [rax], %s\n", argregs[i]);
     }
 
     gen(node->body);
@@ -157,6 +156,8 @@ void gen(Node *node) {
         printf("  pop rax\n");
         if (node->type->ty == CHAR) {
             printf("  movsx rax, byte ptr [rax]\n");
+        } else if (node->type->ty == INT) {
+            printf("  movsxd rax, dword ptr [rax]\n");
         } else {
             printf("  mov rax, qword ptr [rax]\n");
         }
@@ -170,6 +171,8 @@ void gen(Node *node) {
         printf("  pop rax\n");
         if (node->type->ty == CHAR) {
             printf("  mov byte ptr [rax], dil\n");
+        } else if (node->type->ty == INT) {
+            printf("  mov dword ptr [rax], edi\n");
         } else {
             printf("  mov qword ptr [rax], rdi\n");
         }
@@ -189,6 +192,8 @@ void gen(Node *node) {
         printf("  pop rax\n");
         if (node->gvar->type->ty == CHAR) {
             printf("  movsx rax, byte ptr [rax]\n");
+        } else if (node->gvar->type->ty == INT) {
+            printf("  movsxd rax, dword ptr [rax]\n");
         } else {
             printf("  mov rax, qword ptr [rax]\n");
         }
