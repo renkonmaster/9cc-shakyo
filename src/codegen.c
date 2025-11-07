@@ -6,7 +6,7 @@ static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {
         printf("  mov rax, rbp\n");
-        printf("  sub rax, %d\n", node->offset);
+        printf("  lea rax, [rax-%d]\n", node->offset);
         printf("  push rax\n");
         return;
     }
@@ -97,7 +97,19 @@ void gen_funcdef(Node *node){
     printf("%s:\n", node->funcname);
     printf("  push rbp\n");
     printf("  mov rbp , rsp\n");
-    printf("  sub rsp, 208\n");
+
+    int stack_size = 0;
+    for (LVar *lvar = node->locals; lvar; lvar = lvar->next) {
+        if (lvar->type->ty == ARRAY) {
+            stack_size += (lvar->type->array_size) * (size_of(lvar->type->ptr_to));
+        } else {
+            stack_size += size_of(lvar->type);
+        }
+    }
+
+    stack_size = (stack_size + 15) / 16 * 16;
+
+    printf("  sub rsp, %d\n", stack_size);
 
     for (int i = 0; i < node->arg_count; i++) {
         Node *arg = node->args[i];
@@ -107,10 +119,6 @@ void gen_funcdef(Node *node){
     }
 
     gen(node->body);
-
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
 }
 
 void gen(Node *node) {
@@ -150,7 +158,7 @@ void gen(Node *node) {
         if (node->type->ty == CHAR) {
             printf("  movsx rax, byte ptr [rax]\n");
         } else {
-            printf("  mov rax, [rax]\n");
+            printf("  mov rax, qword ptr [rax]\n");
         }
         printf("  push rax\n");
         return;
@@ -161,9 +169,9 @@ void gen(Node *node) {
         printf("  pop rdi\n");
         printf("  pop rax\n");
         if (node->type->ty == CHAR) {
-            printf("  mov [rax], dil\n");
+            printf("  mov byte ptr [rax], dil\n");
         } else {
-            printf("  mov [rax], rdi\n");
+            printf("  mov qword ptr [rax], rdi\n");
         }
         printf("  push rdi\n");
         return;
@@ -179,7 +187,11 @@ void gen(Node *node) {
     case ND_GVAR:
         gen_lval(node);
         printf("  pop rax\n");
-        printf("  mov rax, [rax]\n");
+        if (node->gvar->type->ty == CHAR) {
+            printf("  movsx rax, byte ptr [rax]\n");
+        } else {
+            printf("  mov rax, qword ptr [rax]\n");
+        }
         printf("  push rax\n");  
         return;
     case ND_STRING:

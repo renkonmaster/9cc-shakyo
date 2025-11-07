@@ -15,6 +15,26 @@ int test_string() {
     return 0;
 }
 
+int foo(int a, int b) {
+    return 2* a + b;
+}
+
+int test_pointer() {
+    int x;
+    x = 3;
+    int *p;
+    p = &x;
+    return *p + 2;
+}
+
+int test_arr() {
+    int arr[3];
+    arr[0] = 10;
+    arr[1] = 20;
+    arr[2] = 30;
+    return 0;
+}
+
 int main() {
     //一度にすべてのテストコードをコンパイルする
     if (42 != hoge()) {
@@ -25,6 +45,7 @@ int main() {
         return 1;
     }
 
+<<<<<<< HEAD
     if (0 != a) {
         return 1;
     }
@@ -36,6 +57,18 @@ int main() {
     if (-255 != c) {
         return 1;
     }
+=======
+    if (foo(3, 4) != 10) {
+        return 1;
+    }
+
+    if (test_pointer() != 5) {
+        return 1;
+    }
+
+    char *z;
+    z = "Hello 9cc!";
+>>>>>>> 8702502deb7bc9c6e46135dc75dcdf084fa0ea73
 
     printf("✅ All tests passed!\n");
     return 0;
