@@ -45,7 +45,6 @@ int main() {
         return 1;
     }
 
-<<<<<<< HEAD
     if (0 != a) {
         return 1;
     }
@@ -57,18 +56,6 @@ int main() {
     if (-255 != c) {
         return 1;
     }
-=======
-    if (foo(3, 4) != 10) {
-        return 1;
-    }
-
-    if (test_pointer() != 5) {
-        return 1;
-    }
-
-    char *z;
-    z = "Hello 9cc!";
->>>>>>> 8702502deb7bc9c6e46135dc75dcdf084fa0ea73
 
     printf("✅ All tests passed!\n");
     return 0;
