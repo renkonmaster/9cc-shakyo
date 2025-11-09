@@ -99,11 +99,9 @@ void gen_funcdef(Node *node){
 
     int stack_size = 0;
     for (LVar *lvar = node->locals; lvar; lvar = lvar->next) {
-        if (lvar->type->ty == ARRAY) {
-            stack_size += (lvar->type->array_size) * (size_of(lvar->type->ptr_to));
-        } else {
-            stack_size += size_of(lvar->type);
-        }
+        int sz = size_of(lvar->type);
+        int alloc = ((sz + 7) / 8) * 8;
+        stack_size += alloc;
     }
 
     int aligned = (stack_size + 15) / 16 * 16;
@@ -118,6 +116,11 @@ void gen_funcdef(Node *node){
     }
 
     gen(node->body);
+
+    /* 明示的なreturnがなくても安全に戻る*/
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
 }
 
 void gen(Node *node) {
@@ -181,7 +184,13 @@ void gen(Node *node) {
     case ND_DEREF:
         gen(node->lhs);
         printf("  pop rax\n");
-        printf("  mov rax, [rax]\n");
+        if (node->type && node->type->ty == CHAR) {
+            printf("  movsx rax, byte ptr [rax]\n");
+        } else if (node->type && node->type->ty == INT) {
+            printf("  movsxd rax, dword ptr [rax]\n");
+        } else {
+            printf("  mov rax, qword ptr [rax]\n");
+        }
         printf("  push rax\n");
         return;
     case ND_ADDR:

@@ -69,8 +69,7 @@ Type *basetype() {
         if (token->len == 3 && !memcmp(token->str, "int", 3)) {
             type = int_type();
         } else if (token->len == 4 && !memcmp(token->str, "char", 4)) {
-            type = calloc(1, sizeof(Type));
-            type->ty = CHAR;
+            type = char_type();
         } else {
             error(token->str);
         }
@@ -191,8 +190,10 @@ void declaration() {
     lvar->len = tok->len;
     lvar->type = type;
     
+    int sz = size_of(type);
+    int alloc = (sz + 7) / 8 * 8;
     lvar->next = locals;
-    lvar->offset = locals ? locals->offset + 8 : 8;
+    lvar->offset = locals ? locals->offset + alloc : alloc;
     locals = lvar;
 
     expect(";");
@@ -228,10 +229,9 @@ Node *function_def(Type *ret_type, Token *tok) {
             lvar->len = arg_tok->len;
             lvar->type = type;
             
-            if (locals) 
-                lvar->offset = locals->offset + 8;
-            else
-                lvar->offset = 8;
+            int sz = size_of(type);
+            int alloc = (sz + 7) / 8 * 8;
+            lvar->offset = locals ? locals->offset + alloc : alloc;
 
             arg->offset = lvar->offset;
             arg->type = lvar->type;
@@ -462,18 +462,41 @@ Node *add() {
     for(;;) {
         if (consume("+")) {
             Node *rhs = mul();
-            if (node->type && node->type->ty == PTR) {
-                int n = size_of(node->type->ptr_to);
-                rhs = new_binary(ND_MUL, rhs, new_node_num(n));
+            // Ptr + Int
+            if (node->type->ty == PTR && rhs->type->ty == INT) {
+                rhs = new_binary(ND_MUL, rhs, new_node_num(size_of(node->type->ptr_to)));
+                node = new_binary(ND_ADD, node, rhs);
+                continue;
             }
+
+            // Int + Ptr
+            if (node->type->ty == INT && rhs->type->ty == PTR) {
+                node = new_binary(ND_ADD, rhs, node);
+                node->type = rhs->type;
+                continue;
+            }
+
             node = new_binary(ND_ADD, node, rhs);
+            node->type = int_type();
+            continue;
         } else if (consume("-")) {
             Node *rhs = mul();
-            if (node->type && node->type->ty == PTR) {
-                int n = size_of(node->type->ptr_to);
-                rhs = new_binary(ND_MUL, rhs, new_node_num(n));
+            // Ptr - Int
+            if (node->type->ty == PTR && rhs->type->ty == INT) {
+                rhs = new_binary(ND_MUL, rhs, new_node_num(size_of(node->type->ptr_to)));
+                node = new_binary(ND_SUB, node, rhs);
+                continue;
+            }
+
+            // Ptr - Ptr
+            if (node->type->ty == PTR && rhs->type->ty == PTR){
+                node = new_binary(ND_SUB, node, rhs);
+                node->type = int_type();
+                continue;
             }
             node = new_binary(ND_SUB, node, rhs);
+            node->type = int_type();
+            continue;
         } else {
             return node;
         }
@@ -544,10 +567,26 @@ Node *primary() {
             }
             Node *idx = expr();
             expect("]");
-            Node *ptr = new_binary(ND_ADD, node, new_binary(ND_MUL, idx, new_node_num(size_of(node->type->ptr_to))));
+
+            Node *base_addr = new_node(ND_ADDR);
+            base_addr->lhs = node;
+            base_addr->type = ptr_to(node->type->ty == ARRAY ? node->type->ptr_to : node->type);
+
+            Node *mul = new_binary(ND_MUL, idx, new_node_num(size_of(node->type->ptr_to)));
+            Node *ptr = new_binary(ND_ADD, base_addr, mul);
             ptr->type = ptr_to(node->type->ptr_to);
-            node = new_binary(ND_DEREF, ptr, NULL);
+            node = new_node(ND_DEREF);
+            node->lhs = ptr;
             node->type = node->lhs->type->ptr_to;
+            return node;
+        }
+
+        if (node->type->ty == ARRAY) {
+            Node *addr = new_node(ND_ADDR);
+            addr->lhs = node;
+            addr->type = ptr_to(node->type->ptr_to);
+            node = addr;
+            return node;
         }
         return node;
     }
@@ -577,7 +616,7 @@ Node *unary() {
     if (consume_kind(TK_SIZEOF)) {
         Node *node = unary();
         Node *size_node = new_node(ND_NUM);
-        size_node->val = (node->type->ty == INT) ? 4 : 8;
+        size_node->val = size_of(node->type);
         size_node->type = int_type();
         return size_node;
     }

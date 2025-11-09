@@ -6,6 +6,10 @@ int hoge() {
     return 42;
 }
 
+int test_operator_prec() {
+    return 2 + 3 * 4 == 14;
+}
+
 int foo(int a, int b) {
     return 2* a + b;
 }
@@ -18,40 +22,70 @@ int test_pointer() {
     return *p + 2;
 }
 
-int test_arr() {
+int test_ptr1() {
     int arr[3];
+    arr[0] = 10; 
+    arr[1] = 20; 
+    arr[2] = 30;
+    return arr[1];
+}
+
+int test_ptr2() {
+    int arr[3];
+    arr[0] = 10;
+    arr[1] = 20;
+    arr[2] = 30;
+    int *p;
+    p = arr;
+    return *(p + 2);
+}
+
+int test_arr() {
+    int arr[4];
     arr[0] = 10;
     arr[1] = 30;
     arr[2] = 20;
-    return arr[0] * arr[1] * arr[2];
+    arr[3] = 40;
+    return arr[0] * arr[1] * arr[2] * arr[3];
+}
+
+int test_arr2() {
+    int arr[5];
+    arr[2] = 120;
+    return arr[2];
+}
+
+int test_str() {
+    char *s;
+    s = "hello world";
+    printf("%s\n",s);
+    return 0;
 }
 
 int main() {
     //一度にすべてのテストコードをコンパイルする
-    if (0 != a) {
-        return 1;
-    }
+    if (0 != a) return 1;
 
-    if (5 != b) {
-        return 1;
-    }
+    if (5 != b) return 1;
 
-    if (-10 != c) {
-        return 1;
-    }
+    if (-10 != c) return 1;
 
-    if (42 != hoge()) {
-        return 1;
-    }
+    if (42 != hoge()) return 1;
 
-    if (5 != foo(a, b)) {
-        return 1;
-    }
+    if (1 != test_operator_prec()) return 1;
 
-    if (5 != test_pointer()) {
-        return 1;
-    }
+    if (5 != foo(a, b)) return 1;
 
+    if (5 != test_pointer()) return 1;
+
+    if (0 != test_str()) return 1;
+
+    if (240000 != test_arr()) return 1;
+
+    if (120 != test_arr2()) return 1;
+
+    if (20 != test_ptr1()) return 1;
+    if (30 != test_ptr2()) return 1;
 
     printf("✅ All tests passed!\n");
     return 0;
