@@ -304,8 +304,27 @@ void global_declaration(Type *base, Token *tok) {
     gvar->type = base;
     gvar->next = globals;
     gvar->len = tok->len;
+
+    // Array Type
+    if (consume("[")) {
+        int array_size = 0;
+        if (!consume("]")) {
+            Node *size_expr = expr();
+            if (!eval_const(size_expr, &array_size)) {
+                error("Array size must be constant expression");
+            }
+            expect("]");
+        }
+        Type *t = calloc(1, sizeof(Type));
+        t->ty = ARRAY;
+        t->array_size = array_size;
+        t->ptr_to = base;
+        gvar->type = t;
+    }
+    
     globals = gvar;
     gvar->init = NULL;
+
     // グローバル変数の初期化に対応
     if (consume("=")) {
         // String Literal
@@ -328,6 +347,9 @@ void global_declaration(Type *base, Token *tok) {
         }
 
         //Array To Be Implemented
+        if (consume("{")) {
+            error("Array initializer not supported yet");
+        }
 
         // const expr or global address
         Node *init_expr = expr();
