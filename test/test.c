@@ -2,6 +2,9 @@ int a = 2 * 5 - 30 + 80 / 4;
 int b = - 5 + 10;
 int c = -10;
 
+char *str = "hello world!!";
+char *str2 = "Hooray!";
+
 int hoge() {
     return 42;
 }
@@ -86,6 +89,11 @@ int main() {
 
     if (20 != test_ptr1()) return 1;
     if (30 != test_ptr2()) return 1;
+
+    printf("%s\n", str);
+    printf("%s\n", str2);
+    str2 = "Changed string!";
+    printf("%s\n", str2);
 
     printf("✅ All tests passed!\n");
     return 0;

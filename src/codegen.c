@@ -76,19 +76,27 @@ void gen_block(Node *node) {
 }
 
 void gen_funcall(Node *node) {
-    for (int i = node->arg_count - 1; i >= 0; i--) {
+    for (int i = 0; i < node->arg_count; i++) {
         gen(node->args[i]);
     }
 
-    for (int i = 0; i < node->arg_count; i++) {
+    for (int i = node->arg_count - 1; i >= 0; i--) {
         printf("  pop %s\n", argregs[i]);
     }
 
-    printf("  mov r10, rsp\n"); 
-    printf("  and r10, 15\n");
-    printf("  sub rsp, r10\n");
+    int seq = count();
+    printf("  mov rax, rsp\n");
+    printf("  and rax, 15\n");
+    printf("  jnz .L.call.%d\n", seq);
+    printf("  mov rax, 0\n");
     printf("  call %s\n", node->funcname);
-    printf("  add rsp, r10\n");
+    printf("  jmp .L.call.end.%d\n", seq);
+    printf(".L.call.%d:\n", seq);
+    printf("  sub rsp, 8\n");
+    printf("  mov rax, 0\n");
+    printf("  call %s\n", node->funcname);
+    printf("  add rsp, 8\n");
+    printf(".L.call.end.%d:\n", seq);
     printf("  push rax\n");
 }
 
@@ -104,7 +112,9 @@ void gen_funcdef(Node *node){
         stack_size += alloc;
     }
 
-    int aligned = (stack_size + 15) / 16 * 16;
+    const int TEMP_STACK_SIZE = 128;
+    int total = stack_size + TEMP_STACK_SIZE;
+    int aligned = (total + 15) / 16 * 16;
 
     if (aligned > 0) 
         printf("  sub rsp, %d\n", aligned);
@@ -118,9 +128,9 @@ void gen_funcdef(Node *node){
     gen(node->body);
 
     /* 明示的なreturnがなくても安全に戻る*/
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    // printf("  mov rsp, rbp\n");
+    // printf("  pop rbp\n");
+    // printf("  ret\n");
 }
 
 void gen(Node *node) {
