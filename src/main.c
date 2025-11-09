@@ -33,7 +33,7 @@ void gen_Gvar() {
         } else if (gvar->init->kind == ND_STRING) {
             printf("  .quad .LC%d\n", gvar->init->str->id);
         } else {
-            error("Unsupported global variable initializer");
+            error("Unsupported global initializer");
         }
     }
 }

@@ -308,6 +308,28 @@ void global_declaration(Type *base, Token *tok) {
     gvar->init = NULL;
     // グローバル変数の初期化に対応
     if (consume("=")) {
+        // String Literal
+        if (token->kind == TK_STR) {
+            Token *str_tok = token;
+            token = token->next;
+            expect(";");
+
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_STRING;
+            StringLiteral *strlit = calloc(1, sizeof(StringLiteral));
+            strlit->contents = calloc(str_tok->len + 1, 1);
+            memcpy(strlit->contents, str_tok->str, str_tok->len);
+            strlit->next = string_literals;
+            string_literals = strlit;
+
+            node->str = strlit;
+            gvar->init = node;
+            return;
+        }
+
+        //Array To Be Implemented
+
+        // const expr or global address
         Node *init_expr = expr();
         expect(";");
 
@@ -317,8 +339,10 @@ void global_declaration(Type *base, Token *tok) {
             init_node->val = val;
             init_node->type = int_type();
             gvar->init = init_node;
-        } else if (init_expr->kind == ND_STRING) {
+        } else if (init_expr->kind == ND_ADDR || init_expr->kind == ND_STRING) {
             gvar->init = init_expr;
+        } else {
+            error("Invalid global initializer");
         }
     } else {
         expect(";");
