@@ -32,6 +32,30 @@ void gen_Gvar() {
             }
         } else if (gvar->init->kind == ND_STRING) {
             printf("  .quad .LC%d\n", gvar->init->str->id);
+        } else if (gvar->init->kind == ND_BLOCK) {
+            for (int i = 0; i < gvar->init->block_size; i++) {
+                Node *elem = gvar->init->block[i];
+                if (elem->kind == ND_STRING) {
+                    printf("  .quad .LC%d\n", elem->str->id);
+                } else if (elem->kind == ND_NUM) {
+                    int sz = size_of(gvar->type->ptr_to);
+                    switch (sz) {
+                    case 1:
+                        printf("  .byte %d\n", (int)(elem->val));
+                        break;
+                    case 4:
+                        printf("  .long %d\n", (int)(elem->val));
+                        break;
+                    case 8:
+                        printf("  .quad %d\n", (int)(elem->val));
+                        break;
+                    default:
+                        break;
+                    }
+                } else {
+                    error("Unsupported array initializer");
+                }
+            }
         } else {
             error("Unsupported global initializer");
         }

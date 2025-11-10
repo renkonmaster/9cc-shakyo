@@ -346,9 +346,43 @@ void global_declaration(Type *base, Token *tok) {
             return;
         }
 
-        //Array To Be Implemented
-        if (consume("{")) {
-            error("Array initializer not supported yet");
+        //Array Initializer
+        if (gvar->type->ty == ARRAY) {
+            if (!consume("{")) {
+                error("Expected '{' for array initializer");
+            }
+
+            int index = 0;
+            Node **elems = calloc(gvar->type->array_size, sizeof(Node*));
+            while(!consume("}")) {
+                if (index >= gvar->type->array_size) {
+                    error("Too many initializers for array");
+                }
+
+                Node *init_expr = expr();
+                if (init_expr->kind == ND_STRING || init_expr->kind == ND_ADDR) {
+                    elems[index++] = init_expr;
+                }else {
+                    int val;
+                    if (!eval_const(init_expr, &val)) {
+                        error("Array initializer must be constant expression");
+                    }
+                    Node *n = new_node(ND_NUM);
+                    n->val = val;
+                    n->type = int_type();
+                    elems[index++] = n;
+                }
+
+                consume(",");
+            }
+
+            Node *init_node = calloc(1, sizeof(Node));
+            init_node->kind = ND_BLOCK;
+            init_node->block = elems;
+            init_node->block_size = gvar->type->array_size;
+            gvar->init = init_node;
+            expect(";");
+            return;
         }
 
         // const expr or global address

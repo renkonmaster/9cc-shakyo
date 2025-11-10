@@ -5,7 +5,7 @@ int c = -10;
 char *str = "hello world!!";
 char *str2 = "Hooray!";
 
-int arr[3];
+int arr[3] = {1, 2 * 5, -3};
 
 int hoge() {
     return 42;
@@ -97,15 +97,12 @@ int main() {
     str2 = "Changed string!";
     printf("%s\n", str2);
 
-    arr[0] = 100;
-    arr[1] = 200;
-    arr[2] = 300;
     printf("%d %d %d\n", arr[0], arr[1], arr[2]);
 
     int larr[3];
-    larr[0] = 10;
-    larr[1] = 20;
-    larr[2] = 30;
+    larr[0] = 100;
+    larr[1] = -200;
+    larr[2] = 300;
     printf("%d %d %d\n", larr[0], larr[1], larr[2]);
 
     printf("✅ All tests passed!\n");
