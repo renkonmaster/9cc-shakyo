@@ -99,11 +99,12 @@ int main() {
 
     printf("%d %d %d\n", arr[0], arr[1], arr[2]);
 
-    int larr[3];
-    larr[0] = 100;
-    larr[1] = -200;
-    larr[2] = 300;
-    printf("%d %d %d\n", larr[0], larr[1], larr[2]);
+    int lvar_init = 512;
+    int *p = &lvar_init;
+    char *lvar_string_init = "Local string literal initialize test";
+    printf("%s\n", lvar_string_init);
+    printf("lvar_init: %d\n", lvar_init);
+    printf("pointer deref: %d\n", *p);
 
     printf("✅ All tests passed!\n");
     return 0;

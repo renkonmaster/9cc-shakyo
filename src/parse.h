@@ -17,7 +17,7 @@ bool at_eof();
 
 void program(void);
 Node *function_def(Type *ret_type, Token *tok);
-void declaration(void);
+Node *declaration(void);
 void global_declaration(Type *base, Token *tok);
 Node *stmt(void);
 Node *expr(void);

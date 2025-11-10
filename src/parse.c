@@ -163,7 +163,7 @@ Node *new_node_num(int val) {
     return node;
 }
 
-void declaration() {
+Node *declaration() {
     Type *base = basetype();
     Type *type = declarater(base);
 
@@ -196,7 +196,17 @@ void declaration() {
     lvar->offset = locals ? locals->offset + alloc : alloc;
     locals = lvar;
 
+    if (consume("=")) {
+        Node *lhs = new_node(ND_LVAR);
+        lhs->offset = lvar->offset;
+        lhs->type = lvar->type;
+        Node *node = new_binary(ND_ASSIGN, lhs, assign());
+        expect(";");
+        return node;
+    }
+
     expect(";");
+    return NULL;
 }
 
 Node *function_def(Type *ret_type, Token *tok) {
@@ -471,7 +481,9 @@ Node *stmt() {
 
         while(!consume("}")) {
             if (token->kind == TK_TYPE) {
-                declaration();
+                Node *node = declaration();
+                if (node)
+                    stmts[i++] = node;
                 continue;
             }
             stmts[i++] = stmt();
