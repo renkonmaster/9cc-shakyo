@@ -222,6 +222,11 @@ void gen(Node *node) {
         printf("  lea rax, .LC%d[rip]\n", node->str->id);
         printf("  push rax\n");  
         return;
+    case ND_NOT:
+        printf("  cmp rax, 0\n");
+        printf("  sete al\n");
+        printf("  movzb rax, al\n");
+        return;
     }
 
     gen_binary(node);

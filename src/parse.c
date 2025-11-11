@@ -753,6 +753,12 @@ Node *unary() {
         size_node->type = int_type();
         return size_node;
     }
+    if (consume("!")) {
+        Node *node = new_node(ND_NOT);
+        node->lhs = unary();
+        node->type = int_type();
+        return node;
+    }
     if (consume("+")) 
         return array_to_ptr(unary());
     if (consume("-"))

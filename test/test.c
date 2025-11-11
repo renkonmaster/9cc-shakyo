@@ -115,6 +115,13 @@ int main() {
     larr[larr_idx] = 100;
     printf("arr after assign with idx var: %d %d %d\n", larr[0], larr[1], larr[2]);
 
+    int yes = 1;
+    int no = 0;
+    if (!yes) return 1;
+    if (no) return 1;
+    // if (no && yes) return 1;
+    // if (!yes || no) return 1;
+
     printf("✅ All tests passed!\n");
     return 0;
 }
