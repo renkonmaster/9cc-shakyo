@@ -500,16 +500,39 @@ Node *stmt() {
     }
 
     if(consume_kind(TK_FOR)) {
+        LVar *saved_locals = locals;
+
         node = calloc(1, sizeof(Node));
         node->kind = ND_FOR;
         expect("(");
-        node->init = expr();
-        expect(";");    
-        node->cond = expr();
-        expect(";");
-        node->inc = expr();
-        expect(")");
+        if (!consume(";")) {
+            if (token->kind == TK_TYPE) {
+                node->init = declaration();
+            } else {
+                node->init = expr();
+                expect(";");
+            }
+        } else {
+            node->init = NULL;
+        }
+
+        if (!consume(";")) {
+            node->cond = expr();
+            expect(";");
+        } else {
+            node->cond = NULL;
+        }
+
+        if (!consume(")")) {
+            node->inc = expr();
+            expect(")");
+        } else {
+            node->inc = NULL;
+        }
         node->body = stmt();
+
+        locals = saved_locals;
+        
         return node;
     }
 

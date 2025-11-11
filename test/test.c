@@ -142,6 +142,18 @@ int main() {
 
     if (test_bool() == 1) return 1;
 
+    for (int i = 0; i < 10; i = i + 1) {
+        printf("for loop :%d ", i);
+    }
+
+    for (int j = 1; j <= 100; j = j * 2) {
+        printf("<pow2 :%d> ", j);
+    }
+
+    for (int i = 3; i > 0; i = i - 1) {
+        printf("countdown %d\n", i);
+    }
+
     printf("✅ All tests passed!\n");
     return 0;
 }
