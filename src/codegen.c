@@ -2,6 +2,7 @@
 #include "util.h"
 
 static char *argregs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};  
+static int loop_label_count = 0;
 
 void gen_lval(Node *node) {
     if (node->kind == ND_LVAR) {
@@ -56,17 +57,21 @@ void gen_while(Node *node) {
 }
 
 void gen_for(Node *node) {
-    int c = count();
-    gen(node->init);
-    printf(".Lbegin%d:\n", c);
-    gen(node->cond);
-    printf("  pop rax\n");
-    printf("  cmp rax, 0\n");
-    printf("  je  .Lend%d\n", c);
+    if (node->init) gen(node->init);
+    printf(".Lbeginloop%d:\n", loop_label_count);
+    if (node->cond){
+        gen(node->cond);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .Lendloop%d\n", loop_label_count);
+    }
     gen(node->body);
-    gen(node->inc);
-    printf("  jmp .Lbegin%d\n", c);
-    printf(".Lend%d:\n", c);
+    printf(".Lincloop%d:\n", loop_label_count);
+    if (node->inc) gen(node->inc);
+    printf("  jmp .Lbeginloop%d\n", loop_label_count);
+    printf(".Lendloop%d:\n", loop_label_count);
+
+    loop_label_count++;
 }
 
 void gen_block(Node *node) {
@@ -229,6 +234,12 @@ void gen(Node *node) {
         printf("  sete al\n");
         printf("  movzx rax, al\n");
         printf("  push rax\n");
+        return;
+    case ND_BREAK:
+        printf("  jmp .Lendloop%d\n", loop_label_count);
+        return;
+    case ND_CONTINUE:
+        printf("  jmp .Lincloop%d\n", loop_label_count);
         return;
     }
 

@@ -562,6 +562,12 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->rhs = expr();
+    } else if (consume_kind(TK_BREAK)) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BREAK;
+    } else if (consume_kind(TK_CONTINUE)) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_CONTINUE;
     } else {
         node = expr();
     }

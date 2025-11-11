@@ -20,6 +20,8 @@ ReservedWord reservedWords[] = {
     {"else", 4, TK_ELSE},
     {"while", 5, TK_WHILE},
     {"for", 3, TK_FOR},
+    {"break", 5, TK_BREAK},
+    {"continue", 8, TK_CONTINUE},
     {"int", 3, TK_TYPE},
     {"char", 4, TK_TYPE},
     {"sizeof", 6, TK_SIZEOF},

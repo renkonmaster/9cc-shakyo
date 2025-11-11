@@ -154,6 +154,22 @@ int main() {
         printf("countdown %d\n", i);
     }
 
+    for(int i = 0; i < 5; i = i + 1) {
+        if (i == 3) {
+            printf("break at %d\n", i);
+            break;
+        }
+        printf("loop %d\n", i);
+    }
+
+    for(int i = 0; i < 5; i = i + 1) {
+        if (i == 2) {
+            printf("continue at %d\n", i);
+            continue;
+        }
+        printf("loop %d\n", i);
+    }
+
     printf("✅ All tests passed!\n");
     return 0;
 }
