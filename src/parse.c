@@ -197,6 +197,47 @@ Node *declaration() {
     locals = lvar;
 
     if (consume("=")) {
+        if (type->ty == ARRAY) {
+            if (!consume("{")) {
+                error("Expected '{' for array initializer");
+            }
+
+            Node *node = new_node(ND_BLOCK);
+            node->block_size = type->array_size;
+            node->block = calloc(type->array_size, sizeof(Node*));
+            int idx = 0;
+            while(!consume("}")) {
+                if (idx >= type->array_size) {
+                    error("Too many initializers for array");
+                }
+
+                Node *lvar_node = new_node(ND_LVAR);
+                lvar_node->offset = lvar->offset;
+                lvar_node->type = lvar->type;
+
+                Node *base_addr = new_node(ND_ADDR);
+                base_addr->lhs = lvar_node;
+                base_addr->type = ptr_to(type->ptr_to);
+
+                Node *idx_node = new_node_num(idx);
+                Node *mul = new_binary(ND_MUL, idx_node, new_node_num(size_of(type->ptr_to)));
+                Node *ptr = new_binary(ND_ADD, base_addr, mul);
+                ptr->type = ptr_to(type->ptr_to);
+
+                Node *lhs = new_node(ND_DEREF);
+                lhs->lhs = ptr;
+                lhs->type = type->ptr_to;
+                Node *init_expr = expr();
+                Node *assign = new_binary(ND_ASSIGN, lhs, init_expr);
+                
+                node->block[idx++] = assign;
+                consume(",");
+            }
+            expect(";");
+            return node;
+        }
+
+
         Node *lhs = new_node(ND_LVAR);
         lhs->offset = lvar->offset;
         lhs->type = lvar->type;

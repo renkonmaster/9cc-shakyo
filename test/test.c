@@ -106,6 +106,15 @@ int main() {
     printf("lvar_init: %d\n", lvar_init);
     printf("pointer deref: %d\n", *p);
 
+    int larr_init = 255;
+    int larr[3] = {7, -14, larr_init};
+    printf("arr init: %d %d %d\n", larr[0], larr[1], larr[2]);
+    larr[1] = 42;
+    printf("arr after assign: %d %d %d\n", larr[0], larr[1], larr[2]);
+    int larr_idx = 1;
+    larr[larr_idx] = 100;
+    printf("arr after assign with idx var: %d %d %d\n", larr[0], larr[1], larr[2]);
+
     printf("✅ All tests passed!\n");
     return 0;
 }
