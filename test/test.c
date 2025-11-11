@@ -67,6 +67,31 @@ int test_str() {
     return 0;
 }
 
+int test_bool() {
+    int true = 1;
+    int false = 0;
+    if (0) return 1;
+    if (false) return 1;
+    if (!true) return 1;
+    if (!!false) return 1;
+    if (!(!(!true))) return 1;
+    if (true && false) return 1;
+    if (!true && !false) return 1;
+    if (false && true && true) return 1;
+    if (true && false || !true) return 1;
+    if (false || !true || false) return 1;
+    if (false || (false && true)) return 1;
+    if (!(true || false)) return 1;
+    if (!(true && (false || true)) || !true) return 1;
+    
+    if (!1) return 1;
+    if (!!!1) return 1;
+    if (!(1 && (0 || 1)) || !1) return 1;
+    if ((true * false) && (true - false)) return 1;
+    
+    return 0;
+}
+
 int main() {
     //一度にすべてのテストコードをコンパイルする
     if (0 != a) return 1;
@@ -115,14 +140,7 @@ int main() {
     larr[larr_idx] = 100;
     printf("arr after assign with idx var: %d %d %d\n", larr[0], larr[1], larr[2]);
 
-    int yes = 1;
-    int no = 0;
-    if (!yes) return 1;
-    if (no) return 1;
-    if (yes && no) return 1;
-    if (no && 1 && yes) return 1;
-    if (yes && no || !yes) return 1;
-    if (no || !yes || 0) return 1;
+    if (test_bool() == 1) return 1;
 
     printf("✅ All tests passed!\n");
     return 0;

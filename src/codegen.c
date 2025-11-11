@@ -223,9 +223,12 @@ void gen(Node *node) {
         printf("  push rax\n");  
         return;
     case ND_NOT:
+        gen(node->lhs);
+        printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  sete al\n");
-        printf("  movzb rax, al\n");
+        printf("  movzx rax, al\n");
+        printf("  push rax\n");
         return;
     }
 
@@ -238,9 +241,11 @@ void gen_binary(Node *node) {
     // short-circuit evaluation
     if (node->kind == ND_AND) {
         int c = count();
+        printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  je .Lfalse%d\n", c);
         gen(node->rhs);
+        printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  je .Lfalse%d\n", c);
         printf("  mov rax, 1\n");
@@ -248,12 +253,15 @@ void gen_binary(Node *node) {
         printf(".Lfalse%d:\n", c);
         printf("  mov rax, 0\n");
         printf(".Lend%d:\n", c);
+        printf("  push rax\n");
         return;
     } else if (node->kind == ND_OR) {
         int c = count();
+        printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  jne .Ltrue%d\n", c);
         gen(node->rhs);
+        printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  jne .Ltrue%d\n", c);
         printf("  mov rax, 0\n");
@@ -261,6 +269,7 @@ void gen_binary(Node *node) {
         printf(".Ltrue%d:\n", c);
         printf("  mov rax, 1\n");
         printf(".Lend%d:\n", c);
+        printf("  push rax\n");
         return;
     }
 
@@ -305,4 +314,5 @@ void gen_binary(Node *node) {
         break;
     }
     printf("  push rax\n");
+    return;
 }
