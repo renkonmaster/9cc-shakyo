@@ -37,7 +37,6 @@ typedef enum {
     TK_TYPE,
     TK_SIZEOF,
     TK_STR,
-    TK_NOT,
 } TokenKind;
 
 struct Token {
@@ -94,6 +93,8 @@ typedef enum {
     ND_DEREF,
     ND_STRING,
     ND_NOT,
+    ND_AND,
+    ND_OR,
 } NodeKind;
 
 struct Node

@@ -119,8 +119,10 @@ int main() {
     int no = 0;
     if (!yes) return 1;
     if (no) return 1;
-    // if (no && yes) return 1;
-    // if (!yes || no) return 1;
+    if (yes && no) return 1;
+    if (no && 1 && yes) return 1;
+    if (yes && no || !yes) return 1;
+    if (no || !yes || 0) return 1;
 
     printf("✅ All tests passed!\n");
     return 0;

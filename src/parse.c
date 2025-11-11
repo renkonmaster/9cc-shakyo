@@ -551,8 +551,30 @@ Node *expr() {
     return assign();
 }
 
-Node *assign() {
+Node *logicalAND() {
     Node *node = equality();
+    for (;;) {
+        if (consume("&&")) {
+            node = new_binary(ND_AND, node, equality());
+        } else {
+            return node;
+        }
+    }
+}
+
+Node *logicalOR() {
+    Node *node = logicalAND();
+    for (;;) {
+        if (consume("||")) {
+            node = new_binary(ND_OR, node, equality());
+        } else {
+            return node;
+        }
+    }   
+}
+
+Node *assign() {
+    Node *node = logicalOR();
     if (consume("=")){
         node = new_binary(ND_ASSIGN, node, assign());
     }
@@ -567,8 +589,7 @@ Node *equality() {
             node = new_binary(ND_EQ, node, relational());
         else if (consume("!="))
             node = new_binary(ND_NE, node, relational());
-        else
-            return node;
+        else return node;
     }
 }
 

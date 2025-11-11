@@ -21,6 +21,8 @@ Node *declaration(void);
 void global_declaration(Type *base, Token *tok);
 Node *stmt(void);
 Node *expr(void);
+Node *logicalAND(void);
+Node *logicalOR(void);
 Node *assign(void);
 Node *equality(void);
 Node *relational(void);
