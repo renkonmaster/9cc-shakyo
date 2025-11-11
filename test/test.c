@@ -179,6 +179,14 @@ int main() {
             }
         }
     }
+    int infinite_loop_counter = 0;
+    for (;;) {
+        infinite_loop_counter = infinite_loop_counter + 1;
+        if (infinite_loop_counter >= 3) {
+            printf("break infinite loop at %d\n", infinite_loop_counter);
+            break;
+        }
+    }
 
     printf("✅ All tests passed!\n");
     return 0;
