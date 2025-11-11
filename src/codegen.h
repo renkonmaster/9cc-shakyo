@@ -3,6 +3,14 @@
 
 #include "9cc.h"
 
+typedef struct LoopLabel {
+    int current;
+    struct LoopLabel *prev;
+} LoopLabel;
+
+void push_loop_label();
+void pop_loop_label();
+
 void gen(Node *node);
 void gen_lval(Node *node);
 void gen_if(Node *node);

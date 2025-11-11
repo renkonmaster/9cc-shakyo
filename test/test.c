@@ -170,6 +170,16 @@ int main() {
         printf("loop %d\n", i);
     }
 
+    for (int i = 0; i < 3; i = i + 1) {
+        for (int j = 0; j < 3; j = j + 1) {
+            printf("nested loop %d %d\n", i, j);
+            if (i == 1 && j ==1) {
+                printf("break at %d %d\n", i, j);
+                break;
+            }
+        }
+    }
+
     printf("✅ All tests passed!\n");
     return 0;
 }
