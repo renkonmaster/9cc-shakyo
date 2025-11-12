@@ -200,7 +200,13 @@ int main() {
             break;
         }
         i = i + 1;
-    }    
+    }
+    
+    int **x;
+    int y[3][4];
+    printf("sizeof y: %d\n", sizeof(y));
+    printf("sizeof y[0]: %d\n", sizeof(y[0]));
+    // printf("sizeof y[0][0]: %d\n", sizeof(y[0][0]));
 
     printf("✅ All tests passed!\n");
     return 0;

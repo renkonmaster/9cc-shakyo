@@ -175,15 +175,7 @@ Node *declaration() {
     if (lvar)
         error(tok->str);
 
-    if (consume("[")) {
-        int len = expect_number();
-        expect("]");
-        Type *t = calloc(1, sizeof(Type));
-        t->ty = ARRAY;
-        t->array_size = len;
-        t->ptr_to = base;
-        type = t;
-    }
+    type = read_array_suffix(type);
 
     lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
@@ -248,6 +240,25 @@ Node *declaration() {
 
     expect(";");
     return NULL;
+}
+
+Type *read_array_suffix(Type *base) {
+    int dims[16];
+    int dim_count = 0;
+
+    while(consume("[")) {
+        dims[dim_count++] = expect_number();
+        expect("]");
+    }
+
+    for (int i = dim_count -1; i >=0; i--) {
+        Type *t = calloc(1, sizeof(Type));
+        t->ty = ARRAY;
+        t->array_size = dims[i];
+        t->ptr_to = base;
+        base = t;
+    }
+    return base;
 }
 
 Node *function_def(Type *ret_type, Token *tok) {
