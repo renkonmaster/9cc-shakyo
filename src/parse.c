@@ -721,6 +721,7 @@ Node *primary() {
     if (tok) {
         Node *node = calloc(1, sizeof(Node));
 
+        //関数呼び出し
         if (consume("(")) {
             node->kind = ND_FUNCALL;
             node->funcname = calloc(tok->len + 1, 1);
@@ -740,7 +741,7 @@ Node *primary() {
             return node;
         }
 
-        
+        // 変数参照
         LVar *lvar = find_lvar(tok);
         GVar *gvar = find_gvar(tok);
         if (lvar) {
@@ -755,33 +756,6 @@ Node *primary() {
             error(tok->str);
         }
 
-        if (consume("[")) {
-            if (!node->type || node->type->ty != ARRAY && node->type->ty != PTR) {
-                error(token->str);
-            }
-            Node *idx = expr();
-            expect("]");
-
-            Node *base_addr = new_node(ND_ADDR);
-            base_addr->lhs = node;
-            base_addr->type = ptr_to(node->type->ty == ARRAY ? node->type->ptr_to : node->type);
-
-            Node *mul = new_binary(ND_MUL, idx, new_node_num(size_of(node->type->ptr_to)));
-            Node *ptr = new_binary(ND_ADD, base_addr, mul);
-            ptr->type = ptr_to(node->type->ptr_to);
-            node = new_node(ND_DEREF);
-            node->lhs = ptr;
-            node->type = node->lhs->type->ptr_to;
-            return node;
-        }
-
-        if (node->type->ty == ARRAY) {
-            Node *addr = new_node(ND_ADDR);
-            addr->lhs = node;
-            addr->type = ptr_to(node->type->ptr_to);
-            node = addr;
-            return node;
-        }
         return node;
     }
 
@@ -806,6 +780,35 @@ Node *primary() {
     return node;
 }
 
+Node *postfix() {
+    Node *node = primary();
+
+    //配列->ポインタ変換
+    if (node->type && node->type->ty == ARRAY) {
+        node = array_to_ptr(node);
+    }
+
+    while (consume("[")) {
+        Node *idx = expr();
+        expect("]");
+
+        if (!node->type || !node->type->ptr_to)
+            error("invalid subscript on non-pointer type");
+        
+        Node *elem_size = new_node_num(size_of(node->type->ptr_to));
+        Node *mul = new_binary(ND_MUL, idx, elem_size);
+        Node *add = new_binary(ND_ADD, node, mul);
+        add->type = ptr_to(node->type->ptr_to);
+
+        Node *deref = new_node(ND_DEREF);
+        deref->lhs = add;
+        deref->type = node->type->ptr_to;
+        node = deref;
+    }
+
+    return node;
+}
+
 Node *unary() {
     if (consume_kind(TK_SIZEOF)) {
         Node *node = unary();
@@ -821,9 +824,9 @@ Node *unary() {
         return node;
     }
     if (consume("+")) 
-        return array_to_ptr(unary());
+        return unary();
     if (consume("-"))
-        return new_binary(ND_SUB, new_node_num(0), array_to_ptr(unary()));
+        return new_binary(ND_SUB, new_node_num(0), unary());
     if (consume("&")) {
         Node *node = new_node(ND_ADDR);
         node->lhs = unary();
@@ -832,7 +835,7 @@ Node *unary() {
     }
     if (consume("*")) {
         Node *node = new_node(ND_DEREF);
-        node->lhs = array_to_ptr(unary());
+        node->lhs = unary();
         if (node->lhs->type && node->lhs->type->ty == PTR) {
             node->type = node->lhs->type->ptr_to;
         } else {
@@ -840,14 +843,16 @@ Node *unary() {
         }
         return node;
     }
-    Node *node = primary();
-    return array_to_ptr(node);
+
+    return postfix();
 }
 
 Node *array_to_ptr(Node *node) {
     if (!node->type || node->type->ty != ARRAY) {
         return node;
     }
-    node->type = ptr_to(node->type->ptr_to);
-    return node;
+    Node *addr = new_node(ND_ADDR);
+    addr->lhs = node;
+    addr->type = ptr_to(node->type->ptr_to);
+    return addr;
 }
