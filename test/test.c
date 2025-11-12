@@ -188,6 +188,20 @@ int main() {
         }
     }
 
+    int i = 0;
+    while (i < 3){
+        printf("while loop %d\n", i);
+        i = i + 1;
+    }
+
+    while (1){
+        if (i >=6) {
+            printf("break infinite while loop at %d\n", i);
+            break;
+        }
+        i = i + 1;
+    }    
+
     printf("✅ All tests passed!\n");
     return 0;
 }
