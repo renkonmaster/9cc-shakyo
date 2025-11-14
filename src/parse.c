@@ -794,7 +794,7 @@ Node *postfix() {
 
         if (!node->type || !node->type->ptr_to)
             error("invalid subscript on non-pointer type");
-        
+
         Node *elem_size = new_node_num(size_of(node->type->ptr_to));
         Node *mul = new_binary(ND_MUL, idx, elem_size);
         Node *add = new_binary(ND_ADD, node, mul);

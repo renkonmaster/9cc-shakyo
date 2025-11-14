@@ -207,6 +207,7 @@ int main() {
     printf("sizeof y: %d\n", sizeof(y));
     printf("sizeof y[0]: %d\n", sizeof(y[0]));
     printf("sizeof y[0][0]: %d\n", sizeof(y[0][0]));
+    // y[2][3] = 42;
 
     printf("✅ All tests passed!\n");
     return 0;
